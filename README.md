@@ -8,13 +8,13 @@ A file system based "living tree" of functional data.
 
 ## ?
 
-It loads a tree of data recursed from `config.mount`/`**/*.js`.
+TODO: It loads a `tree` of data recursed from `config.mount/**/*.js`.
 
-It synchronizes changes on the file system into the tree.
+TODO: It synchronizes changes: file system ---> `tree`
 
-It emits change events.
+TODO: It synchronizes changes: file system <--- `tree`
 
-TODO: It synchronizes changes on the tree into the file system.
+TODO: It emits change events.
 
 ## eg.
 
