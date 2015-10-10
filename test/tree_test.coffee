@@ -165,4 +165,55 @@ objective 'Tree', ->
             .catch done
 
 
+        it.only 'loads data from multiple js files', (done, expect, Tree) ->
+
+            Tree.create mount: __dirname + '/../test_data/'
+
+            .then (tree) ->
+
+                console.log(tree.planets.inner)
+
+                expect(tree).to.eql
+
+                    sun:
+                        name: 'Sun'
+                        radius: 696000000
+                    planets:
+                        inner:
+                            mercury:
+                                name: 'Mercury'
+                                radius: 2440000
+                            venus:
+                                name: 'Venus'
+                                radius: 6052000
+                            earth:
+                                name: 'Earth'
+                                radius: 6371000
+                            mars:
+                                name: 'Mars'
+                                radius: 3390000
+                        outer:
+                            jupiter:
+                                name: 'Jupiter'
+                                radius: 69911000
+                            saturn:
+                                name: 'Saturn'
+                                radius: 58232000
+                            uranus:
+                                name: 'Uranus'
+                                radius: 25362000
+                            neptune:
+                                name: 'Neptune'
+                                radius: 24622000
+
+
+            .then done
+
+            .catch done
+
+
+
+
+
+
 
