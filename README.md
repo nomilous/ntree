@@ -1,8 +1,10 @@
+`npm install ntree --save`
+
+
+
 # ntree
 
 A file system based "living tree" of functional data.
-
-`npm install ntree --save`
 
 ## ?
 
