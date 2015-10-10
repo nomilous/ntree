@@ -1,6 +1,13 @@
 objective 'PeaTree', ->
 
-    before -> mock 'expect', require('chai').expect
+
+
+    before (PeaTree) -> 
+
+        mock 'expect', require('chai').expect
+        mock 'prototype', PeaTree.PeaTree.prototype
+
+
 
     context 'create()', ->
 
@@ -70,4 +77,12 @@ objective 'PeaTree', ->
             .then done
 
             .catch done
+
+
+        it 'calls instance start', (done, prototype, PeaTree) ->
+
+            prototype.does start: done
+
+            PeaTree.create ->
+
 
