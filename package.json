@@ -1,0 +1,26 @@
+{
+  "name": "peatree",
+  "version": "1.0.0",
+  "description": "a file system based \"living tree\" of data",
+  "main": "index.js",
+  "scripts": {
+    "test": "objective --once"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nomilous/peatree.git"
+  },
+  "author": "",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nomilous/peatree/issues"
+  },
+  "homepage": "https://github.com/nomilous/peatree",
+  "dependencies": {
+    "bluebird": "^2.10.2",
+    "in.": "0.0.14"
+  },
+  "devDependencies": {
+    "chai": "^3.3.0"
+  }
+}
