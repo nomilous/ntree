@@ -21,18 +21,18 @@ objective 'Tree', ->
 
         it 'creates an instance mounted on cwd', (done, expect, Tree) ->
 
-            Tree.create (e, instance) ->
+            Tree.create (e, tree) ->
 
-                expect instance
+                expect tree
                 .to.be.an.instanceof Tree.Tree
 
-                expect instance._meta.mount
+                expect tree._meta.mount
                 .to.equal process.cwd()
 
-                expect instance._meta.shallow
+                expect tree._meta.shallow
                 .to.equal process.cwd() + '/*.js'
 
-                expect instance._meta.deep
+                expect tree._meta.deep
                 .to.equal process.cwd() + '/**/*.js'
 
                 done()
@@ -42,9 +42,9 @@ objective 'Tree', ->
 
         it 'creates an instance per config', (done, expect, Tree) ->
 
-            Tree.create mount: '/p/a/t/h', (e, instance) ->
+            Tree.create mount: '/p/a/t/h', (e, tree) ->
 
-                expect instance._meta.mount
+                expect tree._meta.mount
                 .to.equal '/p/a/t/h'
 
                 done()
@@ -56,9 +56,9 @@ objective 'Tree', ->
 
             Tree.create()
 
-            .then (instance) ->
+            .then (tree) ->
 
-                expect instance
+                expect tree
                 .to.be.an.instanceof Tree.Tree
 
             .then done
@@ -72,12 +72,12 @@ objective 'Tree', ->
 
                 mount: '/p/a/t/h'
 
-            .then (instance) ->
+            .then (tree) ->
 
-                expect instance
+                expect tree
                 .to.be.an.instanceof Tree.Tree
 
-                expect instance._meta.mount
+                expect tree._meta.mount
                 .to.equal '/p/a/t/h'
 
             .then done
@@ -158,7 +158,7 @@ objective 'Tree', ->
 
                     '/mount/point/directory/thing.js': 1
 
-                expect(tree._meta.nodes['/directory/thing.js']).to.be.an.instanceof Node
+                expect(tree._meta.nodes['directory/thing.js']).to.be.an.instanceof Node
 
             .then done
 
