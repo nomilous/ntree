@@ -16,6 +16,10 @@ TODO: It synchronizes changes: file system ---> `tree`
 
 TODO: It synchronizes changes: file system <--- `tree`
 
+TODO: It follows symlinks
+
+todo: It follows weblinks (GET, POST, auth, now there's an interesting rabbit hole!)
+
 TODO: It supports functions.
 
 TODO: It emits change events.
