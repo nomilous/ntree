@@ -24,12 +24,7 @@ ntree.create({mount: '/path/to/data/root'})
 
 })
 
-.catch(function(e) {
-
-  console.error(e.stack);
-  process.exit(e.errno || 1);
-
-})
+.catch(function(e) {});
 
 ```
 
