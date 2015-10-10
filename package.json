@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "a file system based \"living tree\" of data",
   "main": "index.js",
+  "bin": {
+    "peatree": "./bin/peatree"
+  },
   "scripts": {
     "test": "objective --once"
   },

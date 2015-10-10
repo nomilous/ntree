@@ -1,1 +1,1 @@
-module.exports = require('lib/peatree');
+module.exports = require('./lib/tree');
