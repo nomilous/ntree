@@ -1,6 +1,6 @@
 `npm install ntree --save`
 
-
+[![Build Status](https://travis-ci.org/nomilous/ntree.svg)](https://travis-ci.org/nomilous/ntree)
 
 # ntree
 
@@ -8,10 +8,10 @@ A file system based "living tree" of functional data.
 
 ## ?
 
-* Loads a tree of data recursed from `config.mount`/`**/*.js`
-* Changes on the filesystem are synchronized into the tree.
-* Change events are emitted.
-* TODO: Changes in the tree are synchronized back to the file system.
+It loads a tree of data recursed from `config.mount`/`**/*.js`.
+It synchronizes changes on the file system into the tree.
+It emits change events.
+TODO: It synchronizes changes on the tree into the file system. 
 
 ## eg.
 
