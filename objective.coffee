@@ -1,8 +1,8 @@
 objective
     
-    title: 'peatree'
+    title: 'ntree'
     uuid: 'b7c1eeaf-cdc3-4ed8-a883-7de3f1803722'
-    description: 'a file system based "living tree" of data'
+    description: 'a file system based "living tree" of functional data'
     repl: listen: '/tmp/socket-b7c1eeaf-cdc3-4ed8-a883-7de3f1803722'
     once: false
     plugins: 

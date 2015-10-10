@@ -1,29 +1,30 @@
 {
-  "name": "peatree",
+  "name": "ntree",
   "version": "1.0.0",
-  "description": "a file system based \"living tree\" of data",
+  "description": "a file system based \"living tree\" of functional data",
   "main": "index.js",
   "bin": {
-    "peatree": "./bin/peatree"
+    "ntree": "./bin/ntree"
   },
   "scripts": {
     "test": "objective --once"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/nomilous/peatree.git"
+    "url": "https://github.com/nomilous/ntree.git"
   },
   "author": "",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/nomilous/peatree/issues"
+    "url": "https://github.com/nomilous/ntree/issues"
   },
-  "homepage": "https://github.com/nomilous/peatree",
+  "homepage": "https://github.com/nomilous/ntree",
   "dependencies": {
     "bluebird": "^2.10.2",
     "in.": "0.0.14"
   },
   "devDependencies": {
-    "chai": "^3.3.0"
+    "chai": "^3.3.0",
+    "objective": "0.0.40"
   }
 }

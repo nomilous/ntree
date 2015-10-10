@@ -1,8 +1,11 @@
 #!/usr/bin/env node
 
-var peatree = require('../');
+var path = require('path');
+var ntree = require('../');
 
-peatree.create()
+ntree.create({
+  mount: path.normalize(__dirname + '/../test_data')
+})
 
 .then(function(tree) {
 

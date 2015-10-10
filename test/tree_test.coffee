@@ -115,7 +115,7 @@ objective 'Tree', ->
             .catch done
 
 
-        it 'creates nodes with found files', (done, expect, fs, Tree) ->
+        it 'creates nodes with found files', (done, expect, fs, Tree, Node) ->
 
             trace.filter = true;
 
@@ -157,6 +157,8 @@ objective 'Tree', ->
                 expect(tree._meta.files).to.eql 
 
                     '/mount/point/directory/thing.js': 1
+
+                expect(tree._meta.nodes['/directory/thing.js']).to.be.an.instanceof Node
 
             .then done
 
