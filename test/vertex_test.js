@@ -141,7 +141,7 @@ objective('Vertex', function() {
               }
             };
 
-            mount.value = path.normalize('/along/this/path/went.js');
+            mount.value = '/along/this/path/went.js';
 
             var v = new Vertex(tree, {keys: ['along', 'this', 'path', 'went'], fullname: mount.value});
 
