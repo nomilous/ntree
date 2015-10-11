@@ -50,3 +50,10 @@ tree.on('modified');
 tree.on('unmodified');
 
 ```
+
+## important
+
+This is not a database.
+
+Reads from updated data fragment (.js) files are synchronous (per `require('filename')`) and will therefore not scale beyond a moderate concurrency.
+
