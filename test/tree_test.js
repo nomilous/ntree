@@ -4,14 +4,18 @@ objective('Tree', function() {
 
     mock('expect', require('chai').expect);
 
-    mock('prototype', Tree.prototype).stub(function start(callback) {
-      callback(null, this);
-    });
-
   });
 
 
   context('create()', function() {
+
+    before(function(Tree) {
+
+      mock('prototype', Tree.prototype).stub(function start(callback) {
+        callback(null, this);
+      });
+
+    });
 
 
     it('creates an instance mounted on cwd with defaults',
@@ -75,7 +79,24 @@ objective('Tree', function() {
 
   context('start()', function() {
 
+    it('initializes the Tree as a Vertex',
 
+      function(done, expect, Tree, Vertex) {
+
+        mock(Vertex.prototype).does(
+          function init(callback) {
+            callback(null, this);
+          }
+        );
+
+        Tree.create({mount: '/ntree/point'}).then(function(tree) {
+
+          // console.log(tree);
+
+        }).then(done).catch(done);
+
+      }
+    );
 
 
 

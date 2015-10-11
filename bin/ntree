@@ -9,8 +9,10 @@ ntree.create({
 
 .then(function(tree) {
 
-  console.log(Object.keys(tree._meta.nodes));
-  console.log(tree);
+  // console.log(Object.keys(tree._meta.nodes));
+  // console.log(tree);
+
+  console.log(tree._info);
 
 })
 
