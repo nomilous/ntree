@@ -94,7 +94,7 @@ objective('Vertex', function() {
 
           function(done, expect, tree, mount, fs, Vertex, Edge) {
 
-            tree._meta.lazy = true;
+            // tree._meta.lazy = true;
 
             var edges = [];
 
@@ -110,8 +110,8 @@ objective('Vertex', function() {
 
             .then(function(vertex) {
 
-              expect(edges).to.eql([ 'planets.js', 'sun.js', 'sun', 'planets', 'dwarf_planets' ]);
-              expect(Object.keys(vertex._edges)).to.eql(edges);
+              expect(edges).to.eql([ 'planets', 'sun', 'sun', 'planets', 'dwarf_planets' ]);
+              expect(Object.keys(vertex._edges)).to.eql(['planets.js', 'sun.js', 'sun', 'planets', 'dwarf_planets']);
               expect(vertex._edges['planets'].right).to.be.an.instanceof(Vertex);
               expect(vertex._edges['sun'].right._info.stat.isCharacterDevice()).to.eql(false);
 

@@ -10,10 +10,18 @@ ntree.create({
 
 .then(function(tree) {
 
-  // console.log(Object.keys(tree._meta.nodes));
-  // console.log(tree);
+  var repl = require('repl')
+  var os = require('os')
+  var empty = '(' + os.EOL + ')'
+  var r = repl.start({
+    input: process.stdin,
+    output: process.stdout,
+    useGlobal: true
+  });
 
-  console.log(tree);
+  r.context.tree = tree;
+
+  require('repl.history')(r, process.env.HOME + '/.node_history');
 
 })
 

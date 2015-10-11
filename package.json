@@ -20,7 +20,8 @@
   },
   "homepage": "https://github.com/nomilous/ntree",
   "dependencies": {
-    "bluebird": "^2.10.2"
+    "bluebird": "^2.10.2",
+    "repl.history": "^0.1.3"
   },
   "devDependencies": {
     "chai": "^3.3.0",
