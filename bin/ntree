@@ -4,7 +4,8 @@ var path = require('path');
 var ntree = require('../');
 
 ntree.create({
-  mount: path.normalize(__dirname + '/../test_data')
+  mount: path.normalize(__dirname + '/../test_data'),
+  lazy: true,
 })
 
 .then(function(tree) {
@@ -12,7 +13,7 @@ ntree.create({
   // console.log(Object.keys(tree._meta.nodes));
   // console.log(tree);
 
-  console.log(tree._info);
+  console.log(tree);
 
 })
 

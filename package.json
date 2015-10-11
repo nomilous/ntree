@@ -24,6 +24,7 @@
   },
   "devDependencies": {
     "chai": "^3.3.0",
+    "fxt": "^1.0.2",
     "objective": "0.0.40"
   }
 }

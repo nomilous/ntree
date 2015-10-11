@@ -27,7 +27,7 @@ objective('Vertex', function() {
 
       });
 
-      it('calls loadAsFileAsync of stat.isDirectory() is false',
+      it('calls loadAsFile if stat.isDirectory() is false',
 
         function(done, tree, mount, prototype, fs, Vertex) {
 
@@ -35,8 +35,8 @@ objective('Vertex', function() {
 
           var v = new Vertex(tree, {keys: [], fullname: mount.value});
 
-          prototype.does(function loadAsFileAsync(control) {
-            control.callback();
+          prototype.does(function loadAsFile() {
+            
           });
 
           v.loadAsync().then(done).catch(done);
@@ -45,7 +45,7 @@ objective('Vertex', function() {
       );
 
 
-      it('calls loadAsDirAsync of stat.isDirectory() is true',
+      it('calls loadAsDirAsync if stat.isDirectory() is true',
 
         function(done, tree, mount, prototype, fs, Vertex) {
 
@@ -53,8 +53,8 @@ objective('Vertex', function() {
 
           var v = new Vertex(tree, {keys: [], fullname: mount.value});
 
-          prototype.does(function loadAsDirAsync(control) {
-            control.callback();
+          prototype.does(function loadAsDirAsync(callback) {
+            callback();
           });
 
           v.loadAsync().then(done).catch(done);
@@ -79,8 +79,8 @@ objective('Vertex', function() {
             }
           });
 
-          prototype.does(function loadAsFileAsync(control) {
-            control.callback();
+          prototype.does(function loadAsFileAsync(callback) {
+            callback();
           });
 
           v.loadAsync().then(done).catch(done);
@@ -125,11 +125,76 @@ objective('Vertex', function() {
 
       });
 
-      context('loadAsFileAsync()', function() {
+      context('loadAsFile()', function() {
 
-        xit('loads the file',
+        it('merges the file content into the tree',
 
-          function(done) {
+          function(done, tree, mount, path, Vertex, fs, fxt, expect) {
+
+            tree.along = {
+              this: {
+                path: {
+                  through: {
+                    the: 'woods'
+                  }
+                }
+              }
+            };
+
+            mount.value = path.normalize('/along/this/path/went.js');
+
+            var v = new Vertex(tree, {keys: ['along', 'this', 'path', 'went'], fullname: mount.value});
+
+
+            fs.stub(
+              // TODO: objective: readymade stub for require non-existant module
+              function statSync(path) {
+                if (path == '/along/this/path/went.js') {
+                  return mock.original.call(this, __filename);
+                }
+                return mock.original.apply(this, arguments);
+              },
+              function realpathSync(path) {
+                return path;
+              },
+              function readFileSync(path) {
+                if (path != '/along/this/path/went.js') {
+                  return mock.original.apply(this, arguments);
+                }
+                return fxt(function() {/*
+                  module.exports = {
+                    little: {
+                      red:    9,
+                      riding: 1,
+                      hood:   9,
+                    }
+                  }
+                */});
+              }
+            );
+
+            var e = v.loadAsFile();
+
+            if (e) return done(e);
+
+            expect(tree.along).to.eql({
+              this: {
+                path: {
+                  through: {
+                    the: 'woods'
+                  },
+                  went: {
+                    little: {
+                      red: 9,
+                      riding: 1,
+                      hood: 9,
+                    }
+                  }
+                }
+              }
+            });
+
+            done();
 
           }
 
