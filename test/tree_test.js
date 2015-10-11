@@ -30,6 +30,7 @@ objective('Tree', function() {
           expect(tree._meta.mount).to.equal(process.cwd());
           expect(tree._meta.scanInterval).to.equal(1000);
           expect(tree._meta.watchInterval).to.equal(100);
+          expect(tree._meta.lazy).to.equal(false);
 
         })
 
@@ -48,6 +49,7 @@ objective('Tree', function() {
           dont: 'steal anything',
           scanInterval: 10,
           watchInterval: 11,
+          lazy: true,
         })
 
         .then(function(tree) {
@@ -56,6 +58,7 @@ objective('Tree', function() {
           expect(tree._meta.mount).to.equal('/the/bean/stalk');
           expect(tree._meta.scanInterval).to.equal(10);
           expect(tree._meta.watchInterval).to.equal(11);
+          expect(tree._meta.lazy).to.equal(true);
 
         })
 
@@ -79,26 +82,20 @@ objective('Tree', function() {
 
   context('start()', function() {
 
-    it('initializes the Tree as a Vertex',
+    it('initializes the Tree as a Vertex and loads asyncronously',
 
-      function(done, expect, Tree, Vertex) {
+      function(done, Tree, Vertex) {
 
         mock(Vertex.prototype).does(
-          function init(callback) {
+          function loadAsync(callback) {
             callback(null, this);
           }
         );
 
-        Tree.create({mount: '/ntree/point'}).then(function(tree) {
-
-          // console.log(tree);
-
-        }).then(done).catch(done);
+        Tree.create({mount: '/ntree/point'}).then(done).catch(done);
 
       }
     );
-
-
 
   });
 
