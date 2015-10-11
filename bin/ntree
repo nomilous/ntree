@@ -16,10 +16,11 @@ ntree.create({
   var r = repl.start({
     input: process.stdin,
     output: process.stdout,
+
     useGlobal: true
   });
 
-  r.context.tree = tree;
+  r.context.solar_system = tree;
 
   require('repl.history')(r, process.env.HOME + '/.node_history');
 
