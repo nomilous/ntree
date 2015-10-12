@@ -19,6 +19,8 @@ objective('Vertex', function() {
           },
           _tools: {
             logger: console
+          },
+          _pointer: {
           }
         });
         mock('mount', {
@@ -33,7 +35,7 @@ objective('Vertex', function() {
 
           mount.value = __filename;
 
-          var v = new Vertex(tree, {keys: [], fullname: mount.value});
+          var v = new Vertex(tree, {route: [], fullname: mount.value});
 
           prototype.does(function loadAsFile() {
             
@@ -51,7 +53,7 @@ objective('Vertex', function() {
 
           mount.value = __dirname;
 
-          var v = new Vertex(tree, {keys: [], fullname: mount.value});
+          var v = new Vertex(tree, {route: [], fullname: mount.value});
 
           prototype.does(function loadAsDirAsync(callback) {
             callback();
@@ -70,7 +72,7 @@ objective('Vertex', function() {
           mount.value = __dirname;
 
           var v = new Vertex(tree, {
-            keys: [],
+            route: [],
             fullname: mount.value,
             stat: {
               isDirectory: function() {
@@ -79,9 +81,7 @@ objective('Vertex', function() {
             }
           });
 
-          prototype.does(function loadAsFileAsync(callback) {
-            callback();
-          });
+          prototype.does(function loadAsFile() {});
 
           v.loadAsync().then(done).catch(done);
 
@@ -94,7 +94,7 @@ objective('Vertex', function() {
 
           function(done, expect, tree, mount, fs, Vertex, Edge) {
 
-            // tree._meta.lazy = true;
+            tree._meta.lazy = true; // don't recurse
 
             var edges = [];
 
@@ -104,7 +104,9 @@ objective('Vertex', function() {
               }
             )
 
-            var v = new Vertex(tree, {keys: [], fullname: mount.value});
+            var v = new Vertex(tree, {route: [], fullname: mount.value});
+
+            v.assign(false);
 
             v.loadAsync()
 
@@ -143,7 +145,7 @@ objective('Vertex', function() {
 
             mount.value = '/along/this/path/went.js';
 
-            var v = new Vertex(tree, {keys: ['along', 'this', 'path', 'went'], fullname: mount.value});
+            var v = new Vertex(tree, {route: ['along', 'this', 'path', 'went'], fullname: mount.value});
 
 
             fs.stub(

@@ -21,6 +21,7 @@ module.exports = {
       radius: 25362000
     },
     neptune: {
+      name: 'Niptune', // this should collide visibly with planets/outer/neptune/name.js
       radius: 24622000
     }
   }

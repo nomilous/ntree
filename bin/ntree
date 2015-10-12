@@ -1,26 +1,56 @@
 #!/usr/bin/env node
 
+var cmd = require('commander');
 var path = require('path');
-var ntree = require('../');
+var repl = require('repl');
+var mountPoint;
+
+cmd.usage('[options] <dir>');
+
+cmd.description('eg: ntree --lazy ~/ntree/point');
+
+cmd.option('');
+cmd.option('--lazy',    'use lazy loading');
+cmd.option('--debug',   'print debug info');
+cmd.option('--json',    'print json and exit');
+
+cmd.parse(process.argv);
+
+mountPoint = cmd.args[0] ? cmd.args[0][0] == '/' ? cmd.args[0] : process.cwd() + path.sep + cmd.args[0] : process.cwd();
+
+// lazy as true if no mountpoint specified
+
+cmd.lazy = cmd.args[0] ? typeof cmd.lazy == 'boolean' ? cmd.lazy : false : true;
+
+if (cmd.debug) {
+  if (process.env.DEBUG) {
+    process.env.DEBUG += ',ntree*';
+  } else {
+    process.env.DEBUG = 'ntree*';
+  }
+}
+
+var ntree = require('../'); // specifically after env.DEBUG
 
 ntree.create({
-  mount: path.normalize(__dirname + '/../test_data'),
-  lazy: true,
+  mount: path.normalize(mountPoint),
+  lazy: cmd.lazy,
 })
 
 .then(function(tree) {
 
-  var repl = require('repl')
-  var os = require('os')
-  var empty = '(' + os.EOL + ')'
+  if (cmd.json) {
+    console.log(JSON.stringify(tree, null, 2));
+    process.exit(0);
+  }
+
   var r = repl.start({
     input: process.stdin,
     output: process.stdout,
-
-    useGlobal: true
+    ignoreUndefined: true,
   });
 
-  r.context.solar_system = tree;
+  r.context.$ntree = tree;
 
   require('repl.history')(r, process.env.HOME + '/.node_history');
 
@@ -31,4 +61,4 @@ ntree.create({
   console.log(e.stack);
   process.exit(e.errno || 1);
   
-})
+});
