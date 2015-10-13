@@ -136,46 +136,121 @@ objective('Vertex', function() {
 
   context('loadDirectory()', function() {
 
-    it.only('lists the content of the directory and stats each item',
+    it('lists the content of the directory and hands it down a chain of functions',
 
-      function(done, fs, expect, Vertex, tree, mount) {
+      function(done, fs, expect, Vertex, prototype, tree, mount) {
 
         fs.does(
-
           function readdirAsync(dir) {
             expect(dir).to.equal(mount.value);
-            return {
-              then: function(success) {
-                success(['content', 'of', 'directory']);
-              }
-            }
-          },
-
-          function statAsync(item) {
-            expect(item).to.eql(mount.value + '/content');
-            return {then: function() {}}
-          },
-
-          function statAsync(item) {
-            expect(item).to.eql(mount.value + '/of');
-            return {then: function() {}}
-          },
-
-          function statAsync(item) {
-            expect(item).to.eql(mount.value + '/directory');
-            return {then: function() {}}
           }
-
         );
+
+        prototype.does(
+
+          function createVertexInfo(promise) { done(); }
+
+        )
 
         var v = new Vertex(tree, {route: [], fullname: mount.value});
 
         v.loadDirectory()
 
-        .then(done).catch(done);
-
       }
     );
+
+  });
+
+  context('createVertexInfo()', function() {
+
+    it('stats each item in the promised directory listing AND...',
+
+      // And creates a vertex config from each
+      // And filters out items where stat errored
+
+      function(done, fs, expect, Vertex, tree, mount) {
+
+        var v = new Vertex(tree, {route: [], fullname: mount.value});
+
+        var promise = {
+          then: function(handler) {
+            handler(['content', 'of', 'directory', 'with-a-file.js']);
+            return {
+              catch: function() {}
+            }
+          }
+        }
+
+        var createResultPromise = function(isDir, error) {
+          return {
+            then: function(handler) {
+              if (!error) {
+                handler({
+                  isDirectory: function() { return isDir; }
+                });
+              }
+              return {
+                catch: function(handler) {
+                  if (error) handler(error);
+                }
+              }
+            }
+          }
+        }
+
+        fs.does(
+          function statAsync(filename) {
+            expect(filename).to.equal(mount.value + '/content');
+            return createResultPromise(true);
+          },
+
+          function statAsync(filename) {
+            expect(filename).to.equal(mount.value + '/of');
+            return createResultPromise(true, 'Error string');
+          },
+
+          function statAsync(filename) {
+            expect(filename).to.equal(mount.value + '/directory');
+            return createResultPromise(true);
+          },
+
+          function statAsync(filename) {
+            expect(filename).to.equal(mount.value + '/with-a-file.js');
+            return createResultPromise(false);
+          }
+
+        )
+
+        v.createVertexInfo(promise)
+
+        .then(function(vertexInfoList) {
+
+          expect(
+            vertexInfoList.map(function(vertexInfo) {
+              return {
+                name: vertexInfo.name,
+                route: vertexInfo.route,
+              }
+            })
+          )
+          .to.eql([
+            {name: 'content', route: ['content']},
+            // {name: 'of', route: ['of']},        // not included, stat() errored
+            {name: 'directory', route: ['directory']},
+            {name: 'with-a-file.js', route: ['with-a-file']},
+          ]);
+
+          done();
+
+        })
+
+        .catch(done);
+
+      }
+
+    );
+
+  });
 
 
     // it('creates an Edge and a new Vertex for each object in the directory',
@@ -213,7 +288,7 @@ objective('Vertex', function() {
 
     // );
 
-  });
+  // });
 
   xcontext('loadAsFile()', function() {
 
