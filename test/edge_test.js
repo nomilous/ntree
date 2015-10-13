@@ -1,4 +1,4 @@
-objective('Edge', function() {
+xobjective('Edge', function() {
 
   context('init()', function() {
 

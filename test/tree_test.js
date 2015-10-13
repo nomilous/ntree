@@ -4,6 +4,10 @@ objective('Tree', function() {
 
     mock('expect', require('chai').expect);
 
+    mock('deepcopy', function(obj) {
+      return JSON.parse(JSON.stringify(obj));
+    });
+
   });
 
 
@@ -82,7 +86,7 @@ objective('Tree', function() {
 
   context('start()', function() {
 
-    it('initializes the Tree as a Vertex and loads asyncronously',
+    xit('initializes the Tree as a Vertex and loads asyncronously',
 
       function(done, Tree, Vertex) {
 
@@ -96,6 +100,62 @@ objective('Tree', function() {
 
       }
     );
+
+  });
+
+
+  context('functional', function() {
+
+    it('can mount a simple flat file',
+
+      function(done, expect, deepcopy, Tree) {
+
+        Tree.create({
+
+          mount: __dirname + '/../test_data/solar_system/sun.js'
+
+        })
+
+        .then(function(tree) {
+
+          expect(deepcopy(tree)).to.eql({
+
+            name: 'Sun'
+
+          })
+
+        })
+
+        .then(done).catch(done);
+
+      }
+    );
+
+    xit('can mount a simple directory of files',
+
+      function(done, expect, deepcopy, Tree) {
+
+        Tree.create({
+
+          mount: __dirname + '/../test_data/solar_system/dwarf_planets'
+
+        })
+
+        .then(function(tree) {
+
+          expect(deepcopy(tree)).to.eql({
+
+            xx: 1
+
+          })
+
+        })
+
+        .then(done).catch(done);
+
+      }
+    );
+
 
   });
 
