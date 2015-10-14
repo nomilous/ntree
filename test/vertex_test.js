@@ -146,15 +146,23 @@ objective('Vertex', function() {
           }
         );
 
+        var order = [];
+        var last = function(n) {
+          order.push(n);
+          expect(order).to.eql([1, 2]);
+          done();
+        }
+
         prototype.does(
 
-          function createVertexInfo(promise) { done(); }
+          function createVertexInfo() { order.push(1); },
+          function groupVertexTypes() { last(2); }
 
-        )
+        );
 
         var v = new Vertex(tree, {route: [], fullname: mount.value});
 
-        v.loadDirectory()
+        v.loadDirectory().then(done).catch(done);
 
       }
     );
@@ -173,8 +181,8 @@ objective('Vertex', function() {
         var v = new Vertex(tree, {route: [], fullname: mount.value});
 
         var promise = {
-          then: function(handler) {
-            handler(['content', 'of', 'directory', 'with-a-file.js']);
+          then: function(provide) {
+            provide(['content', 'of', 'directory', 'with-a-file.js']);
             return {
               catch: function() {}
             }
@@ -240,15 +248,90 @@ objective('Vertex', function() {
             {name: 'with-a-file.js', route: ['with-a-file']},
           ]);
 
-          done();
-
         })
 
-        .catch(done);
+        .then(done).catch(done);
 
       }
 
     );
+
+  });
+
+
+  context('groupVertexTypes()', function() {
+
+    it('groups the list of vertexes by type',
+
+      function(done, fs, expect, Vertex, tree, mount) {
+
+        var v = new Vertex(tree, {route: [], fullname: mount.value});
+
+        var vertexInfo;
+
+        var promise = {
+          then: function(provide) {
+            provide( vertexInfoList = [
+              {
+                name: 'dir1',
+                stat: {
+                  isDirectory: function() { return true; }
+                }
+              },
+              {
+                name: 'dir2',
+                stat: {
+                  isDirectory: function() { return true; }
+                }
+              },
+              {
+                name: 'something.else',
+                stat: {
+                  isDirectory: function() { return false; }
+                }
+              },
+              {
+                name: 'file1.js',
+                stat: {
+                  isDirectory: function() { return false; }
+                }
+              },
+              {
+                name: 'dir3',
+                stat: {
+                  isDirectory: function() { return true; }
+                }
+              },
+              {
+                name: 'file2.js',
+                stat: {
+                  isDirectory: function() { return false; }
+                }
+              },
+            ]);
+            return {
+              catch: function() {}
+            }
+          }
+        };
+
+        v.groupVertexTypes(promise)
+
+        .then(function(sets) {
+
+          expect(sets.directory.map(function(info) {
+            return info.name})
+          ).to.eql(['dir1', 'dir2', 'dir3']);
+
+          expect(sets.javascript.map(function(info) {
+            return info.name})
+          ).to.eql(['file1.js', 'file2.js']);
+
+        })
+
+        .then(done).catch(done);
+
+    });
 
   });
 
