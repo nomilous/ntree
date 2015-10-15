@@ -350,7 +350,7 @@ objective('Vertex', function() {
 
   context('attachVertexFiles()', function() {
 
-    it.only('creates edges and joins vertices to the tree',
+    it('creates edges and joins file vertices to the tree',
 
       function(done, fs, expect, Vertex, Edge, tree, mount, promiseOf) {
 
@@ -390,6 +390,54 @@ objective('Vertex', function() {
         })
 
         .then(done).catch(done);
+
+      }
+    );
+
+  });
+
+
+  context('loadFile()', function() {
+
+    it.only('reads/decodes through the vertex\'s serializer and assembles the result',
+
+      function(done, expect, Vertex) {
+
+        var vertexInfo = {
+          route: [],
+          name: 'NAME',
+          serializer: {
+            decode: function(vertex) {
+              expect(vertex._info.name).to.equal('NAME');
+              return 'CONTENT';
+            }
+          }
+        }
+
+        var v = new Vertex({}, vertexInfo);
+
+        mock(Vertex.prototype).does(
+          function assemble(content) {
+            expect(content).to.equal('CONTENT');
+            done(); 
+          }
+        )
+
+        v.loadFile();
+
+      }
+
+    );
+
+
+  });
+
+
+  context('attachVertexDirectories()', function() {
+
+    it('creates edges and joins directory vertices to the tree',
+
+      function(done) {
 
       }
     );
