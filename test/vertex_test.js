@@ -435,7 +435,7 @@ objective('Vertex', function() {
 
   context('assemble()', function() {
 
-    it.only('attaches directly to pointer if content is a native type',
+    it('attaches directly to pointer if content is a native type',
 
       function(expect, Vertex) {
 
@@ -463,7 +463,7 @@ objective('Vertex', function() {
     );
 
 
-    it.only('recurses object content and define()s onto tree',
+    it('recurses object content and define()s onto tree',
 
       function(expect, Vertex) {
 
@@ -534,21 +534,21 @@ objective('Vertex', function() {
 
   context('define()', function() {
 
-    it('recurses the loading content and defines it into the tree',
+    it.only('attaches native types',
 
-      function(done) {
+      function(expect, Vertex) {
 
-      }
-    );
+        v = new Vertex({}, {route: []});
 
-  });
+        object = {};
 
+        v.define('num',  object, {num:  1});
+        v.define('str',  object, {str:  'string'});
+        v.define('bool', object, {bool: true});
 
-  context('assemble()', function() {
+        expect(object).to.eql({
 
-    it('recurses the loading content and attaches it to the tree',
-
-      function(done) {
+        });
 
       }
     );
