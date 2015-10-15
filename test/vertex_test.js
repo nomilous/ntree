@@ -547,7 +547,32 @@ objective('Vertex', function() {
         v.define('bool', object, {bool: true});
 
         expect(object).to.eql({
+          bool: true,
+          str: 'string',
+          num: 1
+        });
 
+      }
+    );
+
+    it.only('attaches empty object if not native type',
+
+      function(expect, Vertex) {
+
+        v = new Vertex({}, {route: []});
+
+        object = {};
+
+        v.define('deeper',  object, {deeper:  { value: 1 }});
+
+        expect(object).to.eql({
+          deeper: {
+            // value: 1
+            
+            // does not add value: 1 because it's the job
+            // of the recursion in assemble() to build the
+            // tree. Each define() only defines itself.
+          }
         });
 
       }
