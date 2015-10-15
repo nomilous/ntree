@@ -5,6 +5,17 @@ objective('Vertex', function() {
     mock('prototype', Vertex.prototype);
     mock('expect', require('chai').expect);
 
+    mock('promiseOf', function(data) {
+      return {
+        then: function(callback) {
+          callback(data);
+          return {
+            catch: function() {}
+          }
+        }
+      }
+    });
+
   });
 
   beforeEach(function(path) {
@@ -17,8 +28,13 @@ objective('Vertex', function() {
         logger: console
       },
       _pointer: {
+      },
+      _serializers: {
+        '.js': {},
+        '.i': {},
       }
     });
+
     mock('mount', {
       value: path.normalize(__dirname + '/../test_data')
     });
@@ -149,14 +165,15 @@ objective('Vertex', function() {
         var order = [];
         var last = function(n) {
           order.push(n);
-          expect(order).to.eql([1, 2]);
+          expect(order).to.eql([1, 2, 3]);
           done();
         }
 
         prototype.does(
 
           function createVertexInfo() { order.push(1); },
-          function groupVertexTypes() { last(2); }
+          function groupVertexTypes() { order.push(2); },
+          function attachVertexFiles() { last(3); }
 
         );
 
@@ -176,18 +193,11 @@ objective('Vertex', function() {
       // And creates a vertex config from each
       // And filters out items where stat errored
 
-      function(done, fs, expect, Vertex, tree, mount) {
+      function(done, fs, expect, Vertex, tree, mount, promiseOf) {
 
         var v = new Vertex(tree, {route: [], fullname: mount.value});
 
-        var promise = {
-          then: function(provide) {
-            provide(['content', 'of', 'directory', 'with-a-file.js']);
-            return {
-              catch: function() {}
-            }
-          }
-        }
+        var directoryListing = ['content', 'of', 'directory', 'with-a-file.js'];
 
         var createResultPromise = function(isDir, error) {
           return {
@@ -229,7 +239,7 @@ objective('Vertex', function() {
 
         )
 
-        v.createVertexInfo(promise)
+        v.createVertexInfo(promiseOf(directoryListing))
 
         .then(function(vertexInfoList) {
 
@@ -263,59 +273,56 @@ objective('Vertex', function() {
 
     it('groups the list of vertexes by type',
 
-      function(done, fs, expect, Vertex, tree, mount) {
+      function(done, fs, expect, Vertex, tree, mount, promiseOf) {
 
         var v = new Vertex(tree, {route: [], fullname: mount.value});
 
-        var vertexInfo;
-
-        var promise = {
-          then: function(provide) {
-            provide( vertexInfoList = [
-              {
-                name: 'dir1',
-                stat: {
-                  isDirectory: function() { return true; }
-                }
-              },
-              {
-                name: 'dir2',
-                stat: {
-                  isDirectory: function() { return true; }
-                }
-              },
-              {
-                name: 'something.else',
-                stat: {
-                  isDirectory: function() { return false; }
-                }
-              },
-              {
-                name: 'file1.js',
-                stat: {
-                  isDirectory: function() { return false; }
-                }
-              },
-              {
-                name: 'dir3',
-                stat: {
-                  isDirectory: function() { return true; }
-                }
-              },
-              {
-                name: 'file2.js',
-                stat: {
-                  isDirectory: function() { return false; }
-                }
-              },
-            ]);
-            return {
-              catch: function() {}
+        var vertexInfoList = [
+          {
+            name: 'dir1',
+            stat: {
+              isDirectory: function() { return true; }
+            }
+          },
+          {
+            name: 'dir2',
+            stat: {
+              isDirectory: function() { return true; }
+            }
+          },
+          {
+            name: 'something.else',
+            stat: {
+              isDirectory: function() { return false; }
+            }
+          },
+          {
+            name: 'info.i',
+            stat: {
+              isDirectory: function() { return false; }
+            }
+          },
+          {
+            name: 'file1.js',
+            stat: {
+              isDirectory: function() { return false; }
+            }
+          },
+          {
+            name: 'dir3',
+            stat: {
+              isDirectory: function() { return true; }
+            }
+          },
+          {
+            name: 'file2.js',
+            stat: {
+              isDirectory: function() { return false; }
             }
           }
-        };
+        ];
 
-        v.groupVertexTypes(promise)
+        v.groupVertexTypes(promiseOf(vertexInfoList))
 
         .then(function(sets) {
 
@@ -323,131 +330,70 @@ objective('Vertex', function() {
             return info.name})
           ).to.eql(['dir1', 'dir2', 'dir3']);
 
-          expect(sets.javascript.map(function(info) {
+          expect(sets.files['.js'].map(function(info) {
             return info.name})
           ).to.eql(['file1.js', 'file2.js']);
+
+          expect(sets.files['.i'].map(function(info) {
+            return info.name})
+          ).to.eql(['info.i']);
 
         })
 
         .then(done).catch(done);
-
-    });
-
-  });
-
-
-    // it('creates an Edge and a new Vertex for each object in the directory',
-
-    //   function(done, expect, tree, mount, fs, Vertex, Edge) {
-
-    //     tree._meta.lazy = true; // don't recurse
-
-    //     var edges = [];
-
-    //     mock(Edge.prototype).spy(
-    //       function init() {
-    //         edges.push(this.name);
-    //       }
-    //     )
-
-    //     var v = new Vertex(tree, {route: [], fullname: mount.value});
-
-    //     v.assign(false);
-
-    //     v.init()
-
-    //     .then(function(vertex) {
-
-    //       expect(edges).to.eql([ 'planets', 'sun', 'sun', 'planets', 'dwarf_planets' ]);
-    //       expect(Object.keys(vertex._edges)).to.eql(['planets.js', 'sun.js', 'sun', 'planets', 'dwarf_planets']);
-    //       expect(vertex._edges['planets'].right).to.be.an.instanceof(Vertex);
-    //       expect(vertex._edges['sun'].right._info.stat.isCharacterDevice()).to.eql(false);
-
-    //     })
-
-    //     .then(done).catch(done);
-
-    //   }
-
-    // );
-
-  // });
-
-  xcontext('loadAsFile()', function() {
-
-    it('merges the file content into the tree',
-
-      function(done, tree, mount, path, Vertex, fs, fxt, expect) {
-
-        tree.along = {
-          this: {
-            path: {
-              through: {
-                the: 'woods'
-              }
-            }
-          }
-        };
-
-        mount.value = '/along/this/path/went.js';
-
-        var v = new Vertex(tree, {route: ['along', 'this', 'path', 'went'], fullname: mount.value});
-
-
-        fs.stub(
-          // TODO: objective: readymade stub for require non-existant module
-          function statSync(path) {
-            if (path == '/along/this/path/went.js') {
-              return mock.original.call(this, __filename);
-            }
-            return mock.original.apply(this, arguments);
-          },
-          function realpathSync(path) {
-            return path;
-          },
-          function readFileSync(path) {
-            if (path != '/along/this/path/went.js') {
-              return mock.original.apply(this, arguments);
-            }
-            return fxt(function() {/*
-              module.exports = {
-                little: {
-                  red:    9,
-                  riding: 1,
-                  hood:   9,
-                }
-              }
-            */});
-          }
-        );
-
-        var e = v.loadAsFile();
-
-        if (e) return done(e);
-
-        expect(tree.along).to.eql({
-          this: {
-            path: {
-              through: {
-                the: 'woods'
-              },
-              went: {
-                little: {
-                  red: 9,
-                  riding: 1,
-                  hood: 9,
-                }
-              }
-            }
-          }
-        });
-
-        done();
 
       }
     );
 
   });
 
+
+  context('attachVertexFiles()', function() {
+
+    it.only('creates edges and joins vertices to the tree',
+
+      function(done, fs, expect, Vertex, Edge, tree, mount, promiseOf) {
+
+        tree.branch = {};
+
+        var v = new Vertex(tree, {route: ['branch'], fullname: mount.value});
+
+        var sortedVertexInfo = {
+          files: {
+            '.js': [
+              {
+                route: ['branch', 'leaf1']
+              },
+              {
+                route: ['branch', 'leaf2']
+              }
+            ]
+          }
+        }
+
+        mock(Vertex.prototype).does(
+          function loadFile() {},
+          function loadFile() {}
+        );
+
+        mock(Edge.prototype).does(
+          function link() {},
+          function link() {}
+        );
+
+        v.attachVertexFiles(promiseOf(sortedVertexInfo))
+
+        .then(function(result) {
+
+          // console.log('RESULT', result);
+
+        })
+
+        .then(done).catch(done);
+
+      }
+    );
+
+  });
 
 });

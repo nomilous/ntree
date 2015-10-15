@@ -156,6 +156,9 @@ objective('Tree', function() {
       }
     );
 
+    it('supports setting serialization to not cross edges');
+
+    it('supports asyncronous edges');
 
   });
 
