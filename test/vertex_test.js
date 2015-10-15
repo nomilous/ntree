@@ -399,7 +399,7 @@ objective('Vertex', function() {
 
   context('loadFile()', function() {
 
-    it.only('reads/decodes through the vertex\'s serializer and assembles the result',
+    it('reads/decodes through the vertex\'s serializer and assembles the result',
 
       function(done, expect, Vertex) {
 
@@ -429,6 +429,129 @@ objective('Vertex', function() {
 
     );
 
+
+  });
+
+
+  context('assemble()', function() {
+
+    it.only('attaches directly to pointer if content is a native type',
+
+      function(expect, Vertex) {
+
+        var vertexInfo = {
+          route: [],
+          // name: 'NAME',
+        }
+
+        var v1 = new Vertex({}, vertexInfo);
+        v1.assemble(1);
+
+        var v2 = new Vertex({}, vertexInfo);
+        v2.assemble('two');
+
+        var v3 = new Vertex({}, vertexInfo);
+        v3.assemble(false);
+
+        expect([
+          v1._pointer,
+          v2._pointer,
+          v3._pointer
+        ]).to.eql([1, 'two', false])
+
+      }
+    );
+
+
+    it.only('recurses object content and define()s onto tree',
+
+      function(expect, Vertex) {
+
+        var vertexInfo = {
+          route: ['starting', 'route'],
+          // name: 'NAME',
+        }
+
+        var tree = {
+          starting: {
+            route: {
+
+            }
+          }
+        }
+
+        var v = new Vertex(tree, vertexInfo);
+
+        mock(Vertex.prototype).does(
+
+          function define(locus, object, value, route) {
+            expect(route).to.eql(['starting', 'route', 'an']);
+          },
+
+          function define(locus, object, value, route) {
+            expect(route).to.eql(['starting', 'route', 'which']);
+          },
+
+          function define(locus, object, value, route) {
+            expect(route).to.eql(['starting', 'route', 'which', 'has']);
+            expect(value.has).to.equal('a bit more');
+          },
+
+          function define(locus, object, value, route) {
+            expect(route).to.eql(['starting', 'route', 'which', 'complexity']);
+            expect(value.complexity).to.equal(true);
+          },
+
+          function define(locus, object, value, route) {
+            expect(route).to.eql(['starting', 'route', 'like']);
+            expect(value.like).to.equal(0);
+          }
+
+        );
+
+        v.assemble({
+          an: 'object',
+          which: {
+            has: 'a bit more',
+            complexity: true,
+          },
+          like: 0
+        });
+
+      }
+    );
+
+    it('supports Array');
+
+    it('supports Date');
+
+    it('supports RegExp');
+
+    it('supports Buffer');
+
+  });
+
+
+  context('define()', function() {
+
+    it('recurses the loading content and defines it into the tree',
+
+      function(done) {
+
+      }
+    );
+
+  });
+
+
+  context('assemble()', function() {
+
+    it('recurses the loading content and attaches it to the tree',
+
+      function(done) {
+
+      }
+    );
 
   });
 
