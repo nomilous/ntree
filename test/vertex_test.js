@@ -163,23 +163,30 @@ objective('Vertex', function() {
         );
 
         var order = [];
-        var last = function(n) {
-          order.push(n);
-          expect(order).to.eql([1, 2, 3]);
-          done();
-        }
 
         prototype.does(
 
           function createVertexInfo() { order.push(1); },
           function groupVertexTypes() { order.push(2); },
-          function attachVertexFiles() { last(3); }
+          function attachVertexFiles() {
+            order.push(3);
+            return {
+              then: function(fn) {
+                fn();
+              }
+            }
+          }
 
         );
 
         var v = new Vertex(tree, {route: [], fullname: mount.value});
 
-        v.loadDirectory().then(done).catch(done);
+        v.loadDirectory().then(function() {
+
+          expect(order).to.eql([1, 2, 3]);
+          done();
+
+        });
 
       }
     );
@@ -534,7 +541,7 @@ objective('Vertex', function() {
 
   context('define()', function() {
 
-    it.only('attaches native types',
+    it('attaches native types',
 
       function(expect, Vertex) {
 
@@ -555,7 +562,7 @@ objective('Vertex', function() {
       }
     );
 
-    it.only('attaches empty object if not native type',
+    it('attaches empty object if not native type',
 
       function(expect, Vertex) {
 
@@ -568,7 +575,7 @@ objective('Vertex', function() {
         expect(object).to.eql({
           deeper: {
             // value: 1
-            
+
             // does not add value: 1 because it's the job
             // of the recursion in assemble() to build the
             // tree. Each define() only defines itself.
@@ -578,12 +585,45 @@ objective('Vertex', function() {
       }
     );
 
+
+    it('sets unconfigurable properties',
+
+      function(done, expect, Vertex) {
+
+        v = new Vertex({}, {route: []});
+
+        object = {};
+
+        v.define('key',  object, { key: 'value 1' });
+
+        object.key = 'value 2';
+
+        expect(object).to.eql({
+          key: 'value 2'
+        });
+
+        try {
+
+          Object.defineProperty(object, 'key', {
+            value: 'value3'
+          });
+
+        } catch (e) {
+
+          expect(e).to.match(/Cannot redefine property/);
+          done();
+
+        }
+
+      }
+    );
+
   });
 
 
   context('attachVertexDirectories()', function() {
 
-    it('creates edges and joins directory vertices to the tree',
+    xit('creates edges and joins directory vertices to the tree',
 
       function(done) {
 

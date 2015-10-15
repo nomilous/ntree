@@ -84,26 +84,6 @@ objective('Tree', function() {
   });
 
 
-  context('start()', function() {
-
-    xit('initializes the Tree as a Vertex and loads asyncronously',
-
-      function(done, Tree, Vertex) {
-
-        mock(Vertex.prototype).does(
-          function loadAsync(callback) {
-            callback(null, this);
-          }
-        );
-
-        Tree.create({mount: '/ntree/point'}).then(done).catch(done);
-
-      }
-    );
-
-  });
-
-
   context('functional', function() {
 
     it('can mount a simple flat file',
