@@ -3,13 +3,24 @@ objective('Vertex', function() {
   before(function(Vertex) {
 
     mock('prototype', Vertex.prototype);
+
     mock('expect', require('chai').expect);
 
     mock('promiseOf', function(data) {
       return {
         then: function(callback) {
-          callback(data);
+          process.nextTick(function() {
+            callback(data);
+          });
           return {
+            then: function(callback) {
+              process.nextTick(function() {
+                callback();
+              });
+              return {
+                catch: function() {}
+              }
+            },
             catch: function() {}
           }
         }
@@ -71,15 +82,13 @@ objective('Vertex', function() {
 
     it('calls loadFile() if stat.isDirectory() is false and route is root',
 
-      function(done, tree, mount, prototype, fs, Vertex) {
+      function(done, tree, mount, prototype, Vertex) {
 
         mount.value = __filename;
 
         var v = new Vertex(tree, {route: [], fullname: mount.value});
 
-        prototype.does(function loadFile() {
-          
-        });
+        prototype.does(function loadFile() {});
 
         v.init().then(done).catch(done);
 
@@ -127,7 +136,7 @@ objective('Vertex', function() {
 
     it('uses existing stat if present',
 
-      function(done, tree, mount, prototype, fs, Vertex) {
+      function(done, tree, mount, prototype, Vertex) {
 
         mount.value = __dirname;
 
@@ -168,8 +177,9 @@ objective('Vertex', function() {
 
           function createVertexInfo() { order.push(1); },
           function groupVertexTypes() { order.push(2); },
-          function attachVertexFiles() {
-            order.push(3);
+          function attachVertexFiles() { order.push(3); },
+          function attachVertexDirectories() {
+            order.push(4);
             return {
               then: function(fn) {
                 fn();
@@ -183,7 +193,7 @@ objective('Vertex', function() {
 
         v.loadDirectory().then(function() {
 
-          expect(order).to.eql([1, 2, 3]);
+          expect(order).to.eql([1, 2, 3, 4]);
           done();
 
         });
@@ -195,7 +205,7 @@ objective('Vertex', function() {
 
   context('createVertexInfo()', function() {
 
-    it('stats each item in the promised directory listing AND...',
+    it('stats each item in the promised directory listing',
 
       // And creates a vertex config from each
       // And filters out items where stat errored
@@ -280,7 +290,7 @@ objective('Vertex', function() {
 
     it('groups the list of vertexes by type',
 
-      function(done, fs, expect, Vertex, tree, mount, promiseOf) {
+      function(done, expect, Vertex, tree, mount, promiseOf) {
 
         var v = new Vertex(tree, {route: [], fullname: mount.value});
 
@@ -333,7 +343,7 @@ objective('Vertex', function() {
 
         .then(function(sets) {
 
-          expect(sets.directory.map(function(info) {
+          expect(sets.directories.map(function(info) {
             return info.name})
           ).to.eql(['dir1', 'dir2', 'dir3']);
 
@@ -359,7 +369,7 @@ objective('Vertex', function() {
 
     it('creates edges and joins file vertices to the tree',
 
-      function(done, fs, expect, Vertex, Edge, tree, mount, promiseOf) {
+      function(done, expect, Vertex, Edge, tree, mount, promiseOf) {
 
         tree.branch = {};
 
@@ -570,7 +580,7 @@ objective('Vertex', function() {
 
         object = {};
 
-        v.define('deeper',  object, {deeper:  { value: 1 }});
+        v.define('deeper',  object, { deeper:  { value: 1 } });
 
         expect(object).to.eql({
           deeper: {
@@ -618,14 +628,49 @@ objective('Vertex', function() {
       }
     );
 
+    context('changes in tree', function() {
+
+      it('raises change events on change of leaf value');
+
+      it('raises change events on addition of new leaf');
+
+      it('raises change events on removal of leaf');
+
+    });
+
   });
 
 
   context('attachVertexDirectories()', function() {
 
-    xit('creates edges and joins directory vertices to the tree',
+    it('creates edges and joins directory vertices to the tree',
 
-      function(done) {
+      function(done, expect, Vertex, Edge, tree, mount, promiseOf) {
+
+        tree.branch = {};
+
+        var v = new Vertex(tree, {route: ['branch'], fullname: mount.value});
+
+        var sortedVertexInfo = {
+          'directories': [
+            {
+              route: ['branch', 'dir1']
+            },
+            {
+              route: ['branch', 'dir2']
+            }
+          ]
+        }
+
+        mock(Edge.prototype).does(
+          function link() {},
+          function link() {}
+        );
+
+        v.attachVertexDirectories(promiseOf(sortedVertexInfo))
+
+        .then(done).catch(done);
+
 
       }
     );
