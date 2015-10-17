@@ -1,10 +1,10 @@
-`npm install ntree --save`
-
 [![Build Status](https://travis-ci.org/nomilous/ntree.svg)](https://travis-ci.org/nomilous/ntree)
 
 # ntree
 
 A file system based "living tree" of functional data.
+
+`npm install ntree --save`
 
 ## ?
 

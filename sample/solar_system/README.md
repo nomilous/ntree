@@ -17,12 +17,12 @@ WARN: 'sample/solar_system/planets/outer' directory ignored (path duplicate)
 
 Some files/directories in this are ignored by the ntree loader because they contain duplicate paths that are not (yet) supported.
 
-eg. Multiple definitions for the vertices called 'inner' and 'earth'
+eg. Multiple definitions for the vertexs called 'inner'
 
 __planets.js__
 ```javascript
 module.exports = {
-  inner: {
+  inner: { // <------------- inner defined here
     earth: {
       name: 'Earth'
     }
@@ -30,7 +30,11 @@ module.exports = {
 } 
 ```
 
-__planets/inner/earth.js__
+and redefind here: __planets/inner.js__
 ```javascript
-module.exports.radius = 6371000;
+module.exports = {
+  earth: {
+    radius: 6371000
+  }
+}
 ```
