@@ -171,6 +171,8 @@ objective('Vertex', function() {
           }
         );
 
+        tree._meta.lazy = true;
+
         var order = [];
 
         prototype.does(
@@ -297,42 +299,49 @@ objective('Vertex', function() {
         var vertexInfoList = [
           {
             name: 'dir1',
+            route: [],
             stat: {
               isDirectory: function() { return true; }
-            }
+            },
           },
           {
             name: 'dir2',
+            route: [],
             stat: {
               isDirectory: function() { return true; }
             }
           },
           {
             name: 'something.else',
+            route: [],
             stat: {
               isDirectory: function() { return false; }
             }
           },
           {
             name: 'info.i',
+            route: [],
             stat: {
               isDirectory: function() { return false; }
             }
           },
           {
             name: 'file1.js',
+            route: [],
             stat: {
               isDirectory: function() { return false; }
             }
           },
           {
             name: 'dir3',
+            route: [],
             stat: {
               isDirectory: function() { return true; }
             }
           },
           {
             name: 'file2.js',
+            route: [],
             stat: {
               isDirectory: function() { return false; }
             }
@@ -561,9 +570,9 @@ objective('Vertex', function() {
 
         object = {};
 
-        v.define('num',  object, {num:  1});
-        v.define('str',  object, {str:  'string'});
-        v.define('bool', object, {bool: true});
+        v.define('num',  object, {num:  1}, []);
+        v.define('str',  object, {str:  'string'}, []);
+        v.define('bool', object, {bool: true}, []);
 
         expect(object).to.eql({
           bool: true,
@@ -582,7 +591,7 @@ objective('Vertex', function() {
 
         object = {};
 
-        v.define('deeper',  object, { deeper:  { value: 1 } });
+        v.define('deeper',  object, { deeper:  { value: 1 } }, []);
 
         expect(object).to.eql({
           deeper: {
@@ -606,7 +615,7 @@ objective('Vertex', function() {
 
         object = {};
 
-        v.define('key',  object, { key: 'value 1' });
+        v.define('key',  object, { key: 'value 1' }, []);
 
         object.key = 'value 2';
 
