@@ -1,0 +1,3 @@
+module.exports = {
+  publicKey: 'pending'
+}
