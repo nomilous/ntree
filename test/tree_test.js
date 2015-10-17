@@ -34,7 +34,6 @@ objective('Tree', function() {
           expect(tree._meta.mount).to.equal(process.cwd());
           expect(tree._meta.scanInterval).to.equal(1000);
           expect(tree._meta.watchInterval).to.equal(100);
-          expect(tree._meta.lazy).to.equal(false);
 
         })
 
@@ -62,7 +61,6 @@ objective('Tree', function() {
           expect(tree._meta.mount).to.equal('/the/bean/stalk');
           expect(tree._meta.scanInterval).to.equal(10);
           expect(tree._meta.watchInterval).to.equal(11);
-          expect(tree._meta.lazy).to.equal(true);
 
         })
 

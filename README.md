@@ -8,9 +8,9 @@ A file system based "living tree" of functional data.
 
 ## ?
 
-TODO: It assembles a `tree` of data from fragments recursed out of the `config.mount` directory.
+It assembles a `tree` of data from fragments recursed out of the `config.mount` directory.
 
-TODO: Each fragment is a node/javascript file with data per whatever it `module.exports`.
+Each fragment is a node/javascript file with data per whatever it `module.exports`.
 
 TODO: It synchronizes changes: file system ---> `tree`
 

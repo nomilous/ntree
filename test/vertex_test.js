@@ -184,7 +184,15 @@ objective('Vertex', function() {
             order.push(4);
             return {
               then: function(fn) {
-                fn();
+                fn([]);
+                return {
+                  then: function(fn) {
+                    fn();
+                    return {
+                      catch: function() {}
+                    }
+                  }
+                }
               }
             }
           }
