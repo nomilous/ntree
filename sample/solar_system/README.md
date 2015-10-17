@@ -38,3 +38,5 @@ module.exports = {
   }
 }
 ```
+
+__NOTE:__ that both `planets.js` and `planets/` were loaded. Duplicates between files and directories are allowed as peers. 
