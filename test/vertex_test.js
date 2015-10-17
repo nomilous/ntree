@@ -175,6 +175,15 @@ objective('Vertex', function() {
 
         var order = [];
 
+
+        // ...AND recurses into nested directories
+
+        testRecurse = mock('vertex', {
+          init: function() {
+            order.push(5);
+          }
+        });
+
         prototype.does(
 
           function createVertexInfo() { order.push(1); },
@@ -184,7 +193,7 @@ objective('Vertex', function() {
             order.push(4);
             return {
               then: function(fn) {
-                fn([]);
+                fn([testRecurse]);
                 return {
                   then: function(fn) {
                     fn();
@@ -203,7 +212,7 @@ objective('Vertex', function() {
 
         v.loadDirectory().then(function() {
 
-          expect(order).to.eql([1, 2, 3, 4]);
+          expect(order).to.eql([1, 2, 3, 4, 5]);
           done();
 
         });
