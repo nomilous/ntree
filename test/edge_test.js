@@ -1,4 +1,4 @@
-objective.only('Edge', function() {
+objective('Edge', function() {
 
   before(function(chai) {
 

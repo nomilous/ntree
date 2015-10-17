@@ -508,9 +508,9 @@ objective('Vertex', function() {
     );
 
 
-    it('recurses object content and define()s onto tree',
+    it('recurses object content and creates property agents for each',
 
-      function(expect, Vertex) {
+      function(expect, Vertex, Agent) {
 
         var vertexInfo = {
           route: ['starting', 'route'],
@@ -527,33 +527,6 @@ objective('Vertex', function() {
 
         var v = new Vertex(tree, vertexInfo);
 
-        mock(Vertex.prototype).does(
-
-          function define(locus, object, value, route) {
-            expect(route).to.eql(['starting', 'route', 'an']);
-          },
-
-          function define(locus, object, value, route) {
-            expect(route).to.eql(['starting', 'route', 'which']);
-          },
-
-          function define(locus, object, value, route) {
-            expect(route).to.eql(['starting', 'route', 'which', 'has']);
-            expect(value.has).to.equal('a bit more');
-          },
-
-          function define(locus, object, value, route) {
-            expect(route).to.eql(['starting', 'route', 'which', 'complexity']);
-            expect(value.complexity).to.equal(true);
-          },
-
-          function define(locus, object, value, route) {
-            expect(route).to.eql(['starting', 'route', 'like']);
-            expect(value.like).to.equal(0);
-          }
-
-        );
-
         v.assemble({
           an: 'object',
           which: {
@@ -562,6 +535,16 @@ objective('Vertex', function() {
           },
           like: 0
         });
+
+        expect(Object.keys(v._agents)).to.eql([
+          'starting/route/an',
+          'starting/route/which',
+          'starting/route/which/has',
+          'starting/route/which/complexity',
+          'starting/route/like',
+        ]);
+
+        expect(v._agents['starting/route/an']).to.be.an.instanceof(Agent);
 
       }
     );
@@ -573,98 +556,6 @@ objective('Vertex', function() {
     it('supports RegExp');
 
     it('supports Buffer');
-
-  });
-
-
-  context('define()', function() {
-
-    it('attaches native types',
-
-      function(expect, Vertex) {
-
-        v = new Vertex({}, {route: []});
-
-        object = {};
-
-        v.define('num',  object, {num:  1}, []);
-        v.define('str',  object, {str:  'string'}, []);
-        v.define('bool', object, {bool: true}, []);
-
-        expect(object).to.eql({
-          bool: true,
-          str: 'string',
-          num: 1
-        });
-
-      }
-    );
-
-    it('attaches empty object if not native type',
-
-      function(expect, Vertex) {
-
-        v = new Vertex({}, {route: []});
-
-        object = {};
-
-        v.define('deeper',  object, { deeper:  { value: 1 } }, []);
-
-        expect(object).to.eql({
-          deeper: {
-            // value: 1
-
-            // does not add value: 1 because it's the job
-            // of the recursion in assemble() to build the
-            // tree. Each define() only defines itself.
-          }
-        });
-
-      }
-    );
-
-
-    it('sets unconfigurable properties',
-
-      function(done, expect, Vertex) {
-
-        v = new Vertex({}, {route: []});
-
-        object = {};
-
-        v.define('key',  object, { key: 'value 1' }, []);
-
-        object.key = 'value 2';
-
-        expect(object).to.eql({
-          key: 'value 2'
-        });
-
-        try {
-
-          Object.defineProperty(object, 'key', {
-            value: 'value3'
-          });
-
-        } catch (e) {
-
-          expect(e).to.match(/Cannot redefine property/);
-          done();
-
-        }
-
-      }
-    );
-
-    context('changes in tree', function() {
-
-      it('raises change events on change of leaf value');
-
-      it('raises change events on addition of leaf');
-
-      it('raises change events on removal of leaf');
-
-    });
 
   });
 
