@@ -92,7 +92,7 @@ objective('Tree', function() {
 
         Tree.create({
 
-          mount: __dirname + '/../test_data/solar_system/sun.js'
+          mount: __dirname + '/../sample/solar_system/sun.js'
 
         })
 
@@ -117,7 +117,7 @@ objective('Tree', function() {
 
         Tree.create({
 
-          mount: __dirname + '/../test_data/solar_system/dwarf_planets'
+          mount: __dirname + '/../sample/solar_system/dwarf_planets'
 
         })
 
