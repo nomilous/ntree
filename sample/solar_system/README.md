@@ -17,7 +17,7 @@ WARN: 'sample/solar_system/planets/outer' directory ignored (path duplicate)
 
 Some files/directories in this are ignored by the ntree loader because they contain duplicate paths that are not (yet) supported.
 
-eg. Multiple definitions for the vertexs called 'inner'
+eg. Multiple definitions for the vertex called 'inner'
 
 __planets.js__
 ```javascript
