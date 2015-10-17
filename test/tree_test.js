@@ -111,7 +111,7 @@ objective('Tree', function() {
       }
     );
 
-    xit('can mount a simple directory of files',
+    it('can mount a simple directory of files',
 
       function(done, expect, deepcopy, Tree) {
 
@@ -125,7 +125,18 @@ objective('Tree', function() {
 
           expect(deepcopy(tree)).to.eql({
 
-            xx: 1
+            eris: {
+              name: 'Eris',
+              radius: 1163000,
+            },
+            makemake: {
+              name: 'Makemake',
+              radius: 739000,
+            },
+            pluto: {
+              name: 'Pluto',
+              radius: 1186000,
+            }
 
           })
 
