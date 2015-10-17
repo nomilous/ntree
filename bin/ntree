@@ -10,7 +10,7 @@ cmd.usage('[options] <dir>');
 cmd.description('eg: ntree --lazy ~/ntree/point');
 
 cmd.option('');
-cmd.option('--lazy',    'use lazy loading');
+// cmd.option('--lazy',    'use lazy loading');
 cmd.option('--debug',   'print debug info');
 cmd.option('--json',    'print json and exit');
 
