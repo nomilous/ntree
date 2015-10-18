@@ -45,10 +45,6 @@ ntree.create({mount: '/path/to/data/root'})
 
 // pending
 
-tree.on('modified');
-
-tree.on('unmodified');
-
 ```
 
 ## important
