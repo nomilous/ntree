@@ -518,6 +518,9 @@ objective('Vertex', function() {
         }
 
         var tree = {
+          _tools: {
+            logger: {}
+          },
           starting: {
             route: {
 

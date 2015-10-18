@@ -1,3 +1,3 @@
 module.exports = {
-  publicKey: 'pending'
+  publicKey: 'v^v^v^v^v^v^v'
 }

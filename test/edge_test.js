@@ -11,7 +11,12 @@ objective('Edge', function() {
     mock('left', {
       _pointer: {},
       _info: {
-        route: []
+        route: [],
+      },
+      _tree: {
+        _tools: {
+          logger: {}
+        }
       }
     });
 
@@ -75,16 +80,16 @@ objective('Edge', function() {
 
   it('creates an unconfigurable property if right vertex is not shared',
 
-    function(done, expect, Edge, left, right1, right2, console) {
+    function(done, expect, Edge, left, right1, right2) {
 
       right1._info.shared = false;
 
       var e = new Edge(left, 'KEY', right1);
       expect(left._pointer.KEY).to.equal('RIGHT 1 VALUE');
 
-      console.does(function warn(message) {
+      mock(left._tree._tools.logger).does(function warn(message) {
 
-        expect(message).to.match(/ignored \(path duplicate\)/);
+        expect(message).to.match(/\(path duplicate\)/);
 
         // first property remains
 

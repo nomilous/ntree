@@ -32,8 +32,7 @@ objective('Tree', function() {
 
           expect(tree).to.be.an.instanceof(Tree);
           expect(tree._meta.mount).to.equal(process.cwd());
-          expect(tree._meta.scanInterval).to.equal(1000);
-          expect(tree._meta.watchInterval).to.equal(100);
+          expect(tree._meta.scanInterval).to.equal(20);
 
         })
 

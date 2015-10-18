@@ -4,13 +4,19 @@ objective('Agent', function() {
 
     mock('expect', require('chai').expect);
 
+    mock('tree', {
+      _tools: {
+        logger: {}
+      }
+    })
+
   });
 
   it('creates native type properties',
 
-    function(expect, Vertex, Agent) {
+    function(expect, Vertex, Agent, tree) {
 
-      v = new Vertex({}, {route: []});
+      v = new Vertex(tree, {route: []});
 
       object = {};
 
@@ -27,25 +33,25 @@ objective('Agent', function() {
     }
   );
 
-  it('attaches empty object if not native type',
+  it('attaches empty object if not native type and calls watchKey',
 
-    function(expect, Vertex, Agent) {
+    function(done, expect, Vertex, Agent, tree) {
 
-      v = new Vertex({}, {route: []});
+      v = new Vertex(tree, {route: []});
 
       object = {};
 
-      var a = new Agent(v, 'deeper',  object, { deeper:  { value: 1 } }, []);
+      mock(Agent.prototype).does(function watchKey() {
 
-      expect(object).to.eql({
-        deeper: {
-          // value: 1
+        expect(object).to.eql({
+          deeper: {}
+        });
 
-          // does not add value: 1 because it's the job
-          // of the recursion in assemble() to build the
-          // tree. Each define() only defines itself.
-        }
+        done();
+
       });
+
+      var a = new Agent(v, 'deeper',  object, { deeper:  { value: 1 } }, []);
 
     }
   );
@@ -53,9 +59,9 @@ objective('Agent', function() {
 
   it('sets unconfigurable properties',
 
-    function(done, expect, Vertex, Agent) {
+    function(done, expect, Vertex, Agent, tree) {
 
-      v = new Vertex({}, {route: []});
+      v = new Vertex(tree, {route: []});
 
       object = {};
 
@@ -82,6 +88,49 @@ objective('Agent', function() {
 
     }
   );
+
+  context('watch() creates a watch that...', function() {
+
+    beforeEach(function() {
+
+      // instance of Agent
+
+      mock('instance', {
+        name: 'KEY',
+        value: {},
+        vertex: {
+          _tree: {
+            _meta: {
+              scanInterval: 20
+            }
+          }
+        }
+      });
+
+    });
+
+    it.only('calls created() when a new property is appended',
+
+      function(done, expect, instance, Agent) {
+
+        Agent.prototype.watch.call(instance);
+
+        mock(instance).does(function created(key) {
+
+          expect(key).to.equal('NewKey');
+
+          done();
+
+        });
+
+        instance.value.NewKey = 1;
+
+      }
+    );
+
+  });
+
+
 
   context('detecting changes', function() {
 
