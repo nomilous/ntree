@@ -128,6 +128,43 @@ objective('Agent', function() {
       }
     );
 
+    it.only('calls destroyed() when a property is removed',
+
+      function(done, expect, instance, Agent) {
+
+        instance.value = {
+          'House of Straw': {
+            residents: ['first little pig']
+          },
+          'House of Sticks': {
+            residents: ['second little pig']
+          },
+          'House of Bricks': {
+            residents: ['second little pig']
+          },
+        }
+
+        Agent.prototype.watch.call(instance);
+
+        mock(instance).does(
+
+          function destroyed(key) {
+            expect(key).to.equal('House of Straw');
+          },
+
+          function destroyed(key) {
+            expect(key).to.equal('House of Sticks');
+            done();
+          }
+
+        );
+
+        delete instance.value['House of Straw'];
+        delete instance.value['House of Sticks'];
+
+      }
+    );
+
   });
 
 
