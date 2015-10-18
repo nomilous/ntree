@@ -444,7 +444,7 @@ objective('Vertex', function() {
 
   context('loadFile()', function() {
 
-    it('reads/decodes through the vertex\'s serializer and assembles the result',
+    it('reads/decodes through the vertex\'s serializer and attaches the result',
 
       function(done, expect, Vertex) {
 
@@ -462,7 +462,7 @@ objective('Vertex', function() {
         var v = new Vertex({}, vertexInfo);
 
         mock(Vertex.prototype).does(
-          function assemble(content) {
+          function attachContent(content) {
             expect(content).to.equal('CONTENT');
             done(); 
           }
@@ -478,7 +478,7 @@ objective('Vertex', function() {
   });
 
 
-  context('assemble()', function() {
+  context('attachContent()', function() {
 
     it('attaches directly to pointer if content is a native type',
 
@@ -490,13 +490,13 @@ objective('Vertex', function() {
         }
 
         var v1 = new Vertex({}, vertexInfo);
-        v1.assemble(1);
+        v1.attachContent(1);
 
         var v2 = new Vertex({}, vertexInfo);
-        v2.assemble('two');
+        v2.attachContent('two');
 
         var v3 = new Vertex({}, vertexInfo);
-        v3.assemble(false);
+        v3.attachContent(false);
 
         expect([
           v1._pointer,
@@ -533,7 +533,7 @@ objective('Vertex', function() {
 
         var v = new Vertex(tree, vertexInfo);
 
-        v.assemble({
+        v.attachContent({
           an: 'object',
           which: {
             has: 'a bit more',
@@ -605,7 +605,13 @@ objective('Vertex', function() {
 
   context('created()', function() {
 
-    it('');
+    xit('creates a directory if the new value is an empty object',
+
+      function(done) {
+
+      }
+
+    );
 
   });
 
