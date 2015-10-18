@@ -36,17 +36,13 @@ objective('Agent', function() {
     }
   );
 
-  it('attaches empty object if not native type and calls watch()',
+  it('attaches empty object if not native type and calls',
 
     function(done, expect, Vertex, Agent, tree) {
 
       v = new Vertex(tree, {route: []});
 
       object = {};
-
-      mock(Agent.prototype).does(function watch() {
-
-      });
 
       var a = new Agent(v, 'deeper',  object, { deeper:  { value: 1 } }, []);
 
