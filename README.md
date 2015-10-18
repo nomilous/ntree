@@ -47,6 +47,15 @@ ntree.create({mount: '/path/to/data/root'})
 
 ```
 
+
+## and use the file system
+
+```
+
+// pending
+
+```
+
 ## important
 
 This is not a database.
