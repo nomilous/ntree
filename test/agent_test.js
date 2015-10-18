@@ -88,7 +88,7 @@ objective('Agent', function() {
     }
   );
 
-  context('watch() creates a watch that...', function() {
+  context('activate() creates a watch that...', function() {
 
     beforeEach(function() {
 
@@ -120,7 +120,7 @@ objective('Agent', function() {
 
       function(done, expect, instance, Agent) {
 
-        Agent.prototype.watch.call(instance);
+        Agent.prototype.activate.call(instance);
 
         mock(instance).does(function created(key) {
 
@@ -151,7 +151,7 @@ objective('Agent', function() {
           },
         })
 
-        Agent.prototype.watch.call(instance);
+        Agent.prototype.activate.call(instance);
 
         mock(instance).does(
 
