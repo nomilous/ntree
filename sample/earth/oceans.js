@@ -1,5 +1,5 @@
 module.exports = {
-  'Pacific Ocean': {
+  'Pacific': {
     area: {
       value: 168723000,
       unit: 'km^2',
@@ -24,7 +24,7 @@ module.exports = {
     }
   },
 
-  'Atlantic Ocean': {
+  'Atlantic': {
     area: {
       value: 85133000,
       unit: 'km^2',
@@ -49,7 +49,7 @@ module.exports = {
     }
   },
 
-  'Indian Ocean': {
+  'Indian': {
     area: {
       value: 70560000,
       unit: 'km^2',
@@ -74,7 +74,7 @@ module.exports = {
     }
   },
 
-  'Southern Ocean': {
+  'Southern': {
     area: {
       value: 21960000,
       unit: 'km^2',
@@ -99,7 +99,7 @@ module.exports = {
     }
   },
 
-  'Arctic Ocean': {
+  'Arctic': {
     area: {
       value: 15558000,
       unit: 'km^2',

@@ -15,7 +15,14 @@ objective('Edge', function() {
       },
       _tree: {
         _tools: {
-          logger: {}
+          logger: {
+            warn: function(m) {
+              console.warn(m);
+            }
+          }
+        },
+        _meta: {
+
         }
       }
     });
@@ -48,9 +55,11 @@ objective('Edge', function() {
 
   });
 
-  it('creates the named enumerable property on the left vertex',
+  it('creates the named enumerable property on the left vertex and starts watching',
 
     function(done, expect, Edge, left, right1) {
+
+      mock(Edge.prototype).does(function watch() {});
 
       var e = new Edge(left, 'KEY', right1);
       expect(Object.keys(left._pointer)).to.eql(['KEY']);

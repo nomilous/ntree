@@ -521,6 +521,9 @@ objective('Vertex', function() {
           _tools: {
             logger: {}
           },
+          _meta: {
+            scanInterval: 20
+          },
           starting: {
             route: {
 

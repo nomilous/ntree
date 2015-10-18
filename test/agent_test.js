@@ -7,6 +7,9 @@ objective('Agent', function() {
     mock('tree', {
       _tools: {
         logger: {}
+      },
+      _meta: {
+        scanInterval: 20
       }
     })
 
@@ -33,7 +36,7 @@ objective('Agent', function() {
     }
   );
 
-  it('attaches empty object if not native type and calls watchKey',
+  it('attaches empty object if not native type and calls watch()',
 
     function(done, expect, Vertex, Agent, tree) {
 
@@ -41,17 +44,17 @@ objective('Agent', function() {
 
       object = {};
 
-      mock(Agent.prototype).does(function watchKey() {
-
-        expect(object).to.eql({
-          deeper: {}
-        });
-
-        done();
+      mock(Agent.prototype).does(function watch() {
 
       });
 
       var a = new Agent(v, 'deeper',  object, { deeper:  { value: 1 } }, []);
+
+      expect(object).to.eql({
+        deeper: {}
+      });
+
+      done();
 
     }
   );
@@ -95,9 +98,17 @@ objective('Agent', function() {
 
       // instance of Agent
 
+      var value = {}
+
       mock('instance', {
         name: 'KEY',
-        value: {},
+        getSync: function() {
+          return value
+        },
+        setSync: function(v) {
+          value = v;
+        },
+        // value: {},
         vertex: {
           _tree: {
             _meta: {
@@ -109,7 +120,7 @@ objective('Agent', function() {
 
     });
 
-    it.only('calls created() when a new property is appended',
+    it('calls created() when a new property is appended',
 
       function(done, expect, instance, Agent) {
 
@@ -123,16 +134,16 @@ objective('Agent', function() {
 
         });
 
-        instance.value.NewKey = 1;
+        instance.getSync().NewKey = 1;
 
       }
     );
 
-    it.only('calls destroyed() when a property is removed',
+    it('calls destroyed() when a property is removed',
 
       function(done, expect, instance, Agent) {
 
-        instance.value = {
+        instance.setSync({
           'House of Straw': {
             residents: ['first little pig']
           },
@@ -142,7 +153,7 @@ objective('Agent', function() {
           'House of Bricks': {
             residents: ['second little pig']
           },
-        }
+        })
 
         Agent.prototype.watch.call(instance);
 
@@ -159,8 +170,8 @@ objective('Agent', function() {
 
         );
 
-        delete instance.value['House of Straw'];
-        delete instance.value['House of Sticks'];
+        delete instance.getSync()['House of Straw'];
+        delete instance.getSync()['House of Sticks'];
 
       }
     );
