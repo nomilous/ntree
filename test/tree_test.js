@@ -59,7 +59,6 @@ objective('Tree', function() {
           expect(tree).to.be.an.instanceof(Tree);
           expect(tree._meta.mount).to.equal('/the/bean/stalk');
           expect(tree._meta.scanInterval).to.equal(10);
-          expect(tree._meta.watchInterval).to.equal(11);
 
         })
 

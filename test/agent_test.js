@@ -177,6 +177,57 @@ objective('Agent', function() {
     );
 
   });
+  
+  context('created()', function() {
+
+    beforeEach(function() {
+
+      mock('agent', {
+        vertex: mock('vertex', {
+          _tree: {
+            _meta: {
+              started: true
+            }
+          }
+        })
+      });
+
+    })
+
+    it('does not call changes while the tree is loading',
+
+      function(done, vertex, agent, Agent) {
+
+        vertex._tree._meta.started = false;
+
+        vertex.spy(function created() {
+          throw new Error('Should not do this.');
+        });
+
+        Agent.prototype.created.call(agent, 'key');
+        done();
+
+      }
+    );
+
+    it('calls vertex.created with the new key and detecting agent',
+
+      function(done, expect, vertex, agent, Agent) {
+
+        vertex.does(function created(key, detector) {
+
+          expect(key).to.equal('key');
+          expect(detector).to.equal(agent);
+          done();
+
+        });
+
+        Agent.prototype.created.call(agent, 'key');
+
+      }
+    );
+
+  });
 
 
 

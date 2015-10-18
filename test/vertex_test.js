@@ -602,4 +602,11 @@ objective('Vertex', function() {
 
   });
 
+
+  context('created()', function() {
+
+    it('');
+
+  });
+
 });
