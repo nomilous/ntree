@@ -13,9 +13,9 @@ objective('Tree', function() {
 
   context('create()', function() {
 
-    before(function(Tree) {
+    before(function(Vertex) {
 
-      mock('prototype', Tree.prototype).stub(function start(callback) {
+      mock(Vertex.prototype).stub(function init(callback) {
         callback(null, this);
       });
 
@@ -67,11 +67,16 @@ objective('Tree', function() {
     );
 
 
-    it('starts the tree',
+    xit('assembles and activates the tree',
 
-      function(done, Tree, prototype) {
+      function(done, Tree) {
 
-        prototype.does({start: done});
+        console.log(Tree.prototype);
+
+        mock(Tree.prototype).does(
+          function assemble() {},
+          function activate() {done();}
+        );
 
         Tree.create();
       }

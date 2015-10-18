@@ -1,6 +1,6 @@
 require('in.');
 
-objective('data', function() {
+xobjective('data', function() {
 
 
   before(function(done) {
@@ -35,9 +35,11 @@ objective('data', function() {
 
   context('sync from tree to disk', function() {
 
-    it('', function(done, tree) {
+    it('creates new directories on the root', function(done, tree) {
 
       // console.log('\nTREE:', JSON.stringify(tree, null, 2));
+
+      tree.objects.moo = {};
       
       done();
 
