@@ -31,7 +31,7 @@ ntree.create({mount: '/path/to/data/root'})
 
 .then(function(tree) {
   
-  // use the tree
+  // and then use the tree
 
 })
 
@@ -39,7 +39,7 @@ ntree.create({mount: '/path/to/data/root'})
 
 ```
 
-## use the tree
+## and then use the tree
 
 ```javascript
 
