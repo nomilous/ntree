@@ -163,18 +163,9 @@ objective('Vertex', function() {
 
     it('lists the content of the directory and hands it down a chain of functions',
 
-      function(done, fs, expect, Vertex, prototype, tree, mount) {
-
-        fs.does(
-          function readdirAsync(dir) {
-            expect(dir).to.equal(mount.value);
-          }
-        );
-
-        tree._meta.lazy = true;
+      function(done, expect, Vertex, prototype, tree, mount) {
 
         var order = [];
-
 
         // ...AND recurses into nested directories
 
@@ -208,7 +199,15 @@ objective('Vertex', function() {
 
         );
 
-        var v = new Vertex(tree, {route: [], fullname: mount.value});
+        var v = new Vertex(tree, {
+          route: [],
+          fullname: mount.value,
+          serializer: {
+            decodeAsync: function() {
+              // mock directory serializer
+            }
+          }
+        });
 
         v.loadDirectory().then(function() {
 

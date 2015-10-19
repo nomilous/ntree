@@ -67,18 +67,36 @@ objective('Tree', function() {
     );
 
 
-    xit('assembles and activates the tree',
+    it('assembles and activates the tree',
 
       function(done, Tree) {
 
+        var promise = {
+          then: function(fn) {
+            return fn();
+          }
+        }
+
         mock(Tree.prototype).does(
-          function _assemble() {},
-          function _activate() {done();}
+          function _assemble() {return promise;},
+          function _activate() {done(); return promise;}
         );
 
         Tree.create();
       }
     );
+
+  });
+
+  context('with instance', function() {
+
+    context('_assemble()', function() {
+
+    });
+
+    context('_activate()', function() {
+
+    });
 
   });
 
