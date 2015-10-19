@@ -80,7 +80,7 @@ objective('Vertex', function() {
 
   context('init()', function() {
 
-    it('calls loadFile() if stat.isDirectory() is false and route is root',
+    it('calls loadFileSync() if stat.isDirectory() is false and route is root',
 
       function(done, tree, mount, prototype, Vertex) {
 
@@ -88,7 +88,7 @@ objective('Vertex', function() {
 
         var v = new Vertex(tree, {route: [], fullname: mount.value});
 
-        prototype.does(function loadFile() {});
+        prototype.does(function loadFileSync() {});
 
         v.init().then(done).catch(done);
 
@@ -96,7 +96,7 @@ objective('Vertex', function() {
     );
 
 
-    it('does not call loadFile() stat.isDirectory() is false and route is not root',
+    it('does not call loadFileSync() stat.isDirectory() is false and route is not root',
       
       function(done, tree, mount, prototype, Vertex) {
 
@@ -106,7 +106,7 @@ objective('Vertex', function() {
 
         var v = new Vertex(tree, {route: ['locus'], fullname: mount.value});
 
-        prototype.spy(function loadFile() {
+        prototype.spy(function loadFileSync() {
           throw new Error('should not run');
         });
 
@@ -150,7 +150,7 @@ objective('Vertex', function() {
           }
         });
 
-        prototype.does(function loadFile() {});
+        prototype.does(function loadFileSync() {});
 
         v.init().then(done).catch(done);
 
@@ -415,8 +415,8 @@ objective('Vertex', function() {
         }
 
         mock(Vertex.prototype).does(
-          function loadFile() {},
-          function loadFile() {}
+          function loadFileSync() {},
+          function loadFileSync() {}
         );
 
         // mock(Edge.prototype).does(
@@ -442,7 +442,7 @@ objective('Vertex', function() {
   });
 
 
-  context('loadFile()', function() {
+  context('loadFileSync()', function() {
 
     it('reads/decodes through the vertex\'s serializer and attaches the result',
 
@@ -452,7 +452,7 @@ objective('Vertex', function() {
           route: [],
           name: 'NAME',
           serializer: {
-            decode: function(vertex) {
+            decodeSync: function(vertex) {
               expect(vertex._info.name).to.equal('NAME');
               return 'CONTENT';
             }
@@ -468,7 +468,7 @@ objective('Vertex', function() {
           }
         )
 
-        v.loadFile();
+        v.loadFileSync();
 
       }
 

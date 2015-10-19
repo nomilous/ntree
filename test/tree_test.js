@@ -71,11 +71,9 @@ objective('Tree', function() {
 
       function(done, Tree) {
 
-        console.log(Tree.prototype);
-
         mock(Tree.prototype).does(
-          function assemble() {},
-          function activate() {done();}
+          function _assemble() {},
+          function _activate() {done();}
         );
 
         Tree.create();
