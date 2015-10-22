@@ -10,7 +10,7 @@ objective
             sourceDir: 'lib'
             testDir: 'test'
             testAppend: '_test'
-            timeout: 400
+            timeout: 1000
             runAll: true
             showTrace: true
             filterTrace: true

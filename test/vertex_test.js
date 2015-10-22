@@ -602,15 +602,142 @@ objective('Vertex', function() {
   });
 
 
-  context('created()', function() {
+  context('onCreatedKey()', function() {
 
-    xit('creates a directory if the new value is an empty object',
+    context('when called on a non-directory vertex', function() {
 
-      function(done) {
+      it('calls whatever serializer loaded the vertex',
 
-      }
+        function(done, Vertex) {
 
-    );
+          var vertex = {
+            _info: {
+              serializer: {
+                encodeSync: done
+              }
+            }
+          }
+
+          var agent = {
+            getSync: function() {
+              return {
+                key: 'Value'
+              }
+            }
+          }
+
+          Vertex.prototype.onCreatedKey.call(vertex, 'key', agent);
+
+        }
+      );
+
+    });
+
+    context('when called on a directory vertex', function() {
+
+      before(function() {
+        mock('vertex', {
+          _tree: {
+            _serializers: {
+              '.js': mock('javascriptSerializer', {
+                constructor: {
+                  name: 'Javascript'
+                }
+              })
+            },
+          },
+          _info: {
+            serializer: mock('directorySerializer', {
+              constructor: {
+                name: 'Directory'
+              }
+            })
+          }
+        });
+        mock('agent');
+      });
+
+      it('calls the directory serializer if the new value is an empty object',
+
+        function(done, expect, directorySerializer, agent, vertex, Vertex) {
+
+          agent.does(function getSync() {
+            return {
+              KEY: {}
+            }
+          });
+
+          directorySerializer.does(function encodeSync(vertex, change) {
+            expect(change).to.eql({
+              change: 'create',
+              key: 'KEY',
+              value: {}
+            });
+            done();
+          });
+
+          Vertex.prototype.onCreatedKey.call(vertex, 'KEY', agent);
+          
+        }
+
+      );
+
+      it('calls the javascript serializer if the new value is a native type',
+
+        function(done, expect, javascriptSerializer, agent, vertex, Vertex) {
+
+          agent.does(function getSync() {
+            return {
+              KEY: 1
+            }
+          });
+
+          javascriptSerializer.does(function encodeSync(vertex, change) {
+            expect(change).to.eql({
+              change: 'create',
+              key: 'KEY',
+              value: 1
+            });
+            done();
+          });
+
+          Vertex.prototype.onCreatedKey.call(vertex, 'KEY', agent);
+          
+        }
+
+      );
+
+      it('calls the javascript serializer if the new value is an object with nested values',
+
+        function(done, expect, javascriptSerializer, agent, vertex, Vertex) {
+
+          agent.does(function getSync() {
+            return {
+              KEY: {
+                more: 1
+              }
+            }
+          });
+
+          javascriptSerializer.does(function encodeSync(vertex, change) {
+            expect(change).to.eql({
+              change: 'create',
+              key: 'KEY',
+              value: {
+                more: 1
+              }
+            });
+            done();
+          });
+
+          Vertex.prototype.onCreatedKey.call(vertex, 'KEY', agent);
+          
+        }
+
+      );
+
+
+    });
 
   });
 

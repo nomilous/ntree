@@ -116,13 +116,13 @@ objective('Agent', function() {
 
     });
 
-    it('calls created() when a new property is appended',
+    it('calls onCreatedKey() when a new property is appended',
 
       function(done, expect, instance, Agent) {
 
         Agent.prototype.activate.call(instance);
 
-        mock(instance).does(function created(key) {
+        mock(instance).does(function onCreatedKey(key) {
 
           expect(key).to.equal('NewKey');
 
@@ -135,7 +135,7 @@ objective('Agent', function() {
       }
     );
 
-    it('calls destroyed() when a property is removed',
+    it('calls onDestroyedKey() when a property is removed',
 
       function(done, expect, instance, Agent) {
 
@@ -155,11 +155,11 @@ objective('Agent', function() {
 
         mock(instance).does(
 
-          function destroyed(key) {
+          function onDestroyedKey(key) {
             expect(key).to.equal('House of Straw');
           },
 
-          function destroyed(key) {
+          function onDestroyedKey(key) {
             expect(key).to.equal('House of Sticks');
             done();
           }
@@ -174,7 +174,7 @@ objective('Agent', function() {
 
   });
   
-  context('created()', function() {
+  context('onCreatedKey()', function() {
 
     beforeEach(function() {
 
@@ -196,21 +196,21 @@ objective('Agent', function() {
 
         vertex._tree._meta.started = false;
 
-        vertex.spy(function created() {
+        vertex.spy(function onCreatedKey() {
           throw new Error('Should not do this.');
         });
 
-        Agent.prototype.created.call(agent, 'key');
+        Agent.prototype.onCreatedKey.call(agent, 'key');
         done();
 
       }
     );
 
-    it('calls vertex.created with the new key and detecting agent',
+    it('calls vertex.onCreatedKey with the new key and detecting agent',
 
       function(done, expect, vertex, agent, Agent) {
 
-        vertex.does(function created(key, detector) {
+        vertex.does(function onCreatedKey(key, detector) {
 
           expect(key).to.equal('key');
           expect(detector).to.equal(agent);
@@ -218,7 +218,7 @@ objective('Agent', function() {
 
         });
 
-        Agent.prototype.created.call(agent, 'key');
+        Agent.prototype.onCreatedKey.call(agent, 'key');
 
       }
     );

@@ -27,7 +27,7 @@ objective('Edge', function() {
       }
     });
 
-    mock('right1', {
+    mock('rightAsFile', {
       _pointer: 'RIGHT 1 VALUE',
       _info: {
         fullname: __dirname + '/KEY.js',
@@ -40,7 +40,7 @@ objective('Edge', function() {
       }
     });
 
-    mock('right2', {
+    mock('rightAsDirectory', {
       _pointer: 'RIGHT 2 VALUE',
       _info: {
         fullname: __dirname + '/KEY',
@@ -57,9 +57,9 @@ objective('Edge', function() {
 
   it('creates the named enumerable property on the left vertex',
 
-    function(done, expect, Edge, left, right1) {
+    function(done, expect, Edge, left, rightAsFile) {
 
-      var e = new Edge(left, 'KEY', right1);
+      var e = new Edge(left, 'KEY', rightAsFile);
       expect(Object.keys(left._pointer)).to.eql(['KEY']);
       expect(left._pointer.KEY).to.equal('RIGHT 1 VALUE');
       done();
@@ -69,15 +69,45 @@ objective('Edge', function() {
 
   it('creates a configurable property if right vertex is shared',
 
-    function(done, expect, Edge, left, right1, right2) {
+    function(done, expect, Edge, left, rightAsFile, rightAsDirectory) {
 
-      right1._info.shared = true;
+      rightAsFile._info.shared = true;
 
-      var e = new Edge(left, 'KEY', right1);
+      var e = new Edge(left, 'KEY', rightAsFile);
       expect(left._pointer.KEY).to.equal('RIGHT 1 VALUE');
 
-      var f = new Edge(left, 'KEY', right2);
+      var f = new Edge(left, 'KEY', rightAsDirectory);
       expect(left._pointer.KEY).to.equal('RIGHT 2 VALUE');
+
+      done();
+
+    }
+  );
+
+
+  it('sets ignoreCreate true if right vertex is shared and not a directory',
+
+    function(done, expect, Edge, left, rightAsFile) {
+
+      rightAsFile._info.shared = true;
+
+      var e = new Edge(left, 'KEY', rightAsFile);
+      expect(e.ignoreCreate).to.be.true;
+
+
+      done();
+
+    }
+  );
+
+  it('sets ignoreCreate false if right vertex is shared and a directory',
+
+    function(done, expect, Edge, left, rightAsDirectory) {
+
+      rightAsDirectory._info.shared = true;
+
+      var e = new Edge(left, 'KEY', rightAsDirectory);
+      expect(e.ignoreCreate).to.be.false;
 
       done();
 
@@ -87,11 +117,11 @@ objective('Edge', function() {
 
   it('creates an unconfigurable property if right vertex is not shared',
 
-    function(done, expect, Edge, left, right1, right2) {
+    function(done, expect, Edge, left, rightAsFile, rightAsDirectory) {
 
-      right1._info.shared = false;
+      rightAsFile._info.shared = false;
 
-      var e = new Edge(left, 'KEY', right1);
+      var e = new Edge(left, 'KEY', rightAsFile);
       expect(left._pointer.KEY).to.equal('RIGHT 1 VALUE');
 
       mock(left._tree._tools.logger).does(function warn(message) {
@@ -104,12 +134,12 @@ objective('Edge', function() {
 
         // AND second right vertex is set to ignore
 
-        expect(right2.ignore).to.equal(true);
+        expect(rightAsDirectory.ignore).to.equal(true);
         done();
 
       });
 
-      var f = new Edge(left, 'KEY', right2);
+      var f = new Edge(left, 'KEY', rightAsDirectory);
 
     }
   );
@@ -117,9 +147,9 @@ objective('Edge', function() {
 
   it('calls getSync() on getting property value',
 
-    function(done, Edge, left, right1) {
+    function(done, Edge, left, rightAsFile) {
 
-      var e = new Edge(left, 'KEY', right1);
+      var e = new Edge(left, 'KEY', rightAsFile);
 
       mock(e).does(function getSync() {});
 
@@ -133,9 +163,9 @@ objective('Edge', function() {
 
   it('calls setSync() on setting property value',
 
-    function(done, expect, Edge, left, right1) {
+    function(done, expect, Edge, left, rightAsFile) {
 
-      var e = new Edge(left, 'KEY', right1);
+      var e = new Edge(left, 'KEY', rightAsFile);
 
       mock(e).does(function setSync(value) {
 
