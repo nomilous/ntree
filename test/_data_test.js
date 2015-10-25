@@ -129,7 +129,35 @@ objective('data', function() {
 
     context('updates javascript files', function() {
 
-      it('');
+      before(reset());
+      before(load('tree'));
+
+      it('writes new data in existing file', function(done, expect, tree, fs, path) {
+
+        tree.objects.T.moo = 1;
+
+        setTimeout(function() {
+          delete require.cache[opts.mount + path.sep + 'objects' + path.sep + 'T.js'];
+          expect(require(opts.mount + path.sep + 'objects' + path.sep + 'T.js')).to.eql({
+            boolean: false,
+            moo: 1,
+            number: 3,
+            object: {
+              E: 3
+            },
+            string: 'three'
+          });
+          done();
+
+        }, 45);
+
+        
+
+      });
+
+      xit('updates data in existing file', function(done, tree, fs, path) {
+
+      });
 
     });
 
