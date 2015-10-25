@@ -43,13 +43,11 @@ objective('data', function() {
     context('creates directories', function() {
 
       before(reset());
-      before(load('tree1'))
+      before(load('tree'))
 
-      it('creates new directories on the root', function(done, expect, tree1, fs, path) {
+      it('creates new directories on the root', function(done, expect, tree, fs, path) {
 
-        console.log('xxx')
-
-        tree1.moo = {};
+        tree.moo = {};
 
         // give the Agent a moment to detect the change
 
@@ -61,9 +59,9 @@ objective('data', function() {
 
       });
 
-      it('creates new directories a bit deeper', function(done, expect, tree1, fs, path) {
+      it('creates new directories a bit deeper', function(done, expect, tree, fs, path) {
 
-        tree1.objects.moo = {};
+        tree.objects.moo = {};
 
         setTimeout(function() {
           expect(fs.readdirSync(opts.mount + path.sep + 'objects')).to.eql(['O', 'R', 'T.js', 'moo']);
@@ -78,14 +76,48 @@ objective('data', function() {
     context('creates javascript files', function() {
 
       before(reset());
-      before(load('tree2'));
+      before(load('tree'));
 
-      it('create files with one value', function(done, expect, tree2, fs, path) {
+      it('create files with native value', function(done, expect, tree, fs, path) {
 
-        tree2.moo = 1;
+        tree.moo1 = 1;
+
         setTimeout(function() {
-          expect(fs.readdirSync(opts.mount)).to.eql(['moo.js', 'objects', 'objects.js']);
-          expect(require(opts.mount + path.sep + 'moo.js')).to.equal(1);
+          expect(fs.readdirSync(opts.mount)).to.eql(['moo1.js', 'objects', 'objects.js']);
+          expect(require(opts.mount + path.sep + 'moo1.js')).to.equal(1);
+          done();
+
+        }, 25)
+
+      });
+
+      it('create files with object value', function(done, expect, tree, fs, path) {
+
+        tree.moo2 = {
+          key1: {
+            key3: 3,
+            key4: 4,
+            key5: {
+              key7: false
+            },
+            key6: 6
+          },
+          key2: 2
+        };
+
+        setTimeout(function() {
+          expect(fs.readdirSync(opts.mount)).to.eql(['moo1.js', 'moo2.js', 'objects', 'objects.js']);
+          expect(require(opts.mount + path.sep + 'moo2.js')).to.eql({
+            key1: {
+              key3: 3,
+              key4: 4,
+              key5: {
+                key7: false
+              },
+              key6: 6
+            },
+            key2: 2
+          });
           done();
 
         }, 25)
