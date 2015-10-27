@@ -75,8 +75,8 @@ objective('data', function() {
 
     context('creates javascript files', function() {
 
-      before(reset());
-      before(load('tree'));
+      beforeEach(reset());
+      beforeEach(load('tree'));
 
       it('create files with native value', function(done, expect, tree, fs, path) {
 
@@ -106,7 +106,7 @@ objective('data', function() {
         };
 
         setTimeout(function() {
-          expect(fs.readdirSync(opts.mount)).to.eql(['moo1.js', 'moo2.js', 'objects', 'objects.js']);
+          expect(fs.readdirSync(opts.mount)).to.eql(['moo2.js', 'objects', 'objects.js']);
           expect(require(opts.mount + path.sep + 'moo2.js')).to.eql({
             key1: {
               key3: 3,
@@ -129,8 +129,8 @@ objective('data', function() {
 
     context('updates javascript files', function() {
 
-      before(reset());
-      before(load('tree'));
+      beforeEach(reset());
+      beforeEach(load('tree'));
 
       it('writes new data in existing file', function(done, expect, tree, fs, path) {
 
@@ -151,11 +151,36 @@ objective('data', function() {
 
         }, 45);
 
-        
-
       });
 
-      xit('updates data in existing file', function(done, tree, fs, path) {
+
+      it('updates data in existing file', function(done, expect, tree, fs, path) {
+
+        tree.objects.S.boolean = 4;
+
+        setTimeout(function() {
+          delete require.cache[opts.mount + path.sep + 'objects.js'];
+          expect(require(opts.mount + path.sep + 'objects.js')).to.eql({
+            A: {
+              boolean: true,
+              number: 4,
+              object: {
+                R: 2
+              },
+              string: 'two'
+            },
+            S: {
+              boolean: 4,
+              number: 5,
+              object: {
+                A: 1
+              },
+              string: 'one'
+            }
+          });
+          done();
+
+        }, 145);
 
       });
 
