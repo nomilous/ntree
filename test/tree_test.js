@@ -87,7 +87,7 @@ objective('Tree', function() {
 
   });
 
-  context.only('event emitter', function() {
+  context('event emitter', function() {
 
     before(function(Vertex) {
 

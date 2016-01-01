@@ -609,12 +609,22 @@ objective('Vertex', function() {
 
       it('calls whatever serializer loaded the vertex',
 
-        function(done, Vertex) {
+        function(done, Vertex, expect) {
 
+          var called = false;
           var vertex = {
+            _tree: {
+              _notify: function() {
+                expect(called).to.be.true;
+                done();
+              }
+            },
             _info: {
               serializer: {
-                encodeSync: done
+                encodeSync: function() {
+                  called = true;
+                  
+                }
               }
             }
           }
@@ -670,10 +680,13 @@ objective('Vertex', function() {
 
           directorySerializer.does(function encodeSync(vertex, change) {
             expect(change).to.eql({
-              change: 'create',
+              op: 'create',
               key: 'KEY',
               value: {}
             });
+          });
+
+          mock(vertex._tree).does(function _notify() {
             done();
           });
 
@@ -695,10 +708,13 @@ objective('Vertex', function() {
 
           javascriptSerializer.does(function encodeSync(vertex, change) {
             expect(change).to.eql({
-              change: 'create',
+              op: 'create',
               key: 'KEY',
               value: 1
             });
+          });
+
+          mock(vertex._tree).does(function _notify() {
             done();
           });
 
@@ -722,12 +738,15 @@ objective('Vertex', function() {
 
           javascriptSerializer.does(function encodeSync(vertex, change) {
             expect(change).to.eql({
-              change: 'create',
+              op: 'create',
               key: 'KEY',
               value: {
                 more: 1
               }
             });
+          });
+
+          mock(vertex._tree).does(function _notify() {
             done();
           });
 
@@ -739,6 +758,36 @@ objective('Vertex', function() {
 
 
     });
+
+  });
+
+  context('onUpdatedKey()', function() {
+
+    beforeEach(function(tree) {
+      mock('vertex', {
+        _info: {
+          name: 'name',
+          serializer: {}
+        },
+        _tree: tree
+      });
+
+      mock('agent', {});
+    });
+
+    it('calls tree notify and serializer encode',
+      function(done, Vertex, vertex, agent, tree) {
+
+        mock(vertex._info.serializer).does(function encodeSync() {});
+
+        tree.does(function _notify() {
+          done();
+        });
+
+        Vertex.prototype.onUpdatedKey.call(vertex, 'KEY', agent, 'OLDVAL', 'NEWVAL');
+
+      }
+    );
 
   });
 
