@@ -138,7 +138,10 @@ objective('data', function() {
 
         setTimeout(function() {
           delete require.cache[opts.mount + path.sep + 'objects' + path.sep + 'T.js'];
-          expect(require(opts.mount + path.sep + 'objects' + path.sep + 'T.js')).to.eql({
+          var T = require(opts.mount + path.sep + 'objects' + path.sep + 'T.js');
+          expect(T.fn()).to.equal('T');
+          delete T.fn;
+          expect(T).to.eql({
             boolean: false,
             moo: 1,
             number: 3,
@@ -160,7 +163,15 @@ objective('data', function() {
 
         setTimeout(function() {
           delete require.cache[opts.mount + path.sep + 'objects.js'];
-          expect(require(opts.mount + path.sep + 'objects.js')).to.eql({
+
+          var objects = require(opts.mount + path.sep + 'objects.js');
+
+          expect(objects.A.fn()).to.equal('A');
+          expect(objects.S.fn()).to.equal('S');
+          delete objects.A.fn;
+          delete objects.S.fn;
+
+          expect(objects).to.eql({
             A: {
               boolean: true,
               number: 4,
