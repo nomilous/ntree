@@ -33,7 +33,6 @@ objective('Vertex', function() {
 
     mock('tree', {
       _meta: {
-        lazy: false
       },
       _tools: {
         logger: console

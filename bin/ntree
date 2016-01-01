@@ -7,7 +7,7 @@ var mountPoint;
 
 cmd.usage('[options] <dir>');
 
-cmd.description('eg: ntree --lazy ~/ntree/point');
+// cmd.description('eg: ntree --lazy ~/ntree/point');
 
 cmd.option('');
 // cmd.option('--lazy',    'use lazy loading');
@@ -19,8 +19,7 @@ cmd.parse(process.argv);
 mountPoint = cmd.args[0] ? cmd.args[0][0] == '/' ? cmd.args[0] : process.cwd() + path.sep + cmd.args[0] : process.cwd();
 
 // lazy as true if no mountpoint specified
-
-cmd.lazy = cmd.args[0] ? typeof cmd.lazy == 'boolean' ? cmd.lazy : false : true;
+// cmd.lazy = cmd.args[0] ? typeof cmd.lazy == 'boolean' ? cmd.lazy : false : true;
 
 if (cmd.debug) {
   if (process.env.DEBUG) {
@@ -34,7 +33,7 @@ var ntree = require('../'); // specifically after env.DEBUG
 
 ntree.create({
   mount: path.normalize(mountPoint),
-  lazy: cmd.lazy,
+  // lazy: cmd.lazy,
 })
 
 .then(function(tree) {
