@@ -562,6 +562,8 @@ objective('Vertex', function() {
 
     it('supports Buffer');
 
+    it('supports Function');
+
   });
 
 

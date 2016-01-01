@@ -36,6 +36,21 @@ objective('Agent', function() {
     }
   );
 
+  it('creates function properties',
+
+    function(expect, Vertex, Agent, tree) {
+
+      v = new Vertex(tree, {route: []});
+
+      object = {};
+
+      var a = new Agent(v, 'fn',  object, {fn:  function() {return 1}}, []);
+
+      expect(object.fn()).to.equal(1);
+
+    }
+  );
+
   it('attaches empty object if not native type and calls',
 
     function(done, expect, Vertex, Agent, tree) {
