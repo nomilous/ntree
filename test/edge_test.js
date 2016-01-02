@@ -115,7 +115,7 @@ objective('Edge', function() {
   );
 
 
-  it('creates an unconfigurable property if right vertex is not shared',
+  xit('creates an unconfigurable property if right vertex is not shared',
 
     function(done, expect, Edge, left, rightAsFile, rightAsDirectory) {
 

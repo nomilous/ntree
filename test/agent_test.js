@@ -71,7 +71,7 @@ objective('Agent', function() {
   );
 
 
-  it('sets unconfigurable properties',
+  xit('sets unconfigurable properties',
 
     function(done, expect, Vertex, Agent, tree) {
 

@@ -22,6 +22,10 @@ TODO: It supports functions.
 
 TODO: It emits change events.
 
+TODO: Maintain key order.
+
+TODO: Standardize change op names (json patch?)
+
 ## eg.
 
 ```javascript

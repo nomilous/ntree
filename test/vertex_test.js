@@ -784,7 +784,37 @@ objective('Vertex', function() {
           done();
         });
 
-        Vertex.prototype.onUpdatedKey.call(vertex, 'KEY', agent, 'OLDVAL', 'NEWVAL');
+        Vertex.prototype.onUpdatedKey.call(vertex, 'KEY', agent, 'OLDVAL');
+
+      }
+    );
+
+  });
+
+  context('onDestroyedKey()', function() {
+
+    beforeEach(function(tree) {
+      mock('vertex', {
+        _info: {
+          name: 'name',
+          serializer: {}
+        },
+        _tree: tree
+      });
+
+      mock('agent', {});
+    });
+
+    it.only('calls tree notify and serializer encode',
+      function(done, Vertex, vertex, agent, tree) {
+
+        mock(vertex._info.serializer).does(function encodeSync() {});
+
+        tree.does(function _notify() {
+          done();
+        });
+
+        Vertex.prototype.onDestroyedKey.call(vertex, 'KEY', agent, 'OLDVAL');
 
       }
     );
