@@ -805,7 +805,7 @@ objective('Vertex', function() {
       mock('agent', {});
     });
 
-    it.only('calls tree notify and serializer encode',
+    it('calls tree notify and serializer encode',
       function(done, Vertex, vertex, agent, tree) {
 
         mock(vertex._info.serializer).does(function encodeSync() {});

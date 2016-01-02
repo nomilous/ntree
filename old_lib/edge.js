@@ -142,7 +142,9 @@ var getSync = debugs.getSync;
 
 Edge.prototype.setSync = function() {
 
-  this.logger.warn('cannot overwrite Edge at \'%s\'', this.routeString)
+  throw new Error('cannot overwrite Edge at ' + this.routeString);
+
+  // this.logger.warn('cannot overwrite Edge at \'%s\'', this.routeString)
 
 }
 

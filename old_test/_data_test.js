@@ -1,6 +1,6 @@
 require('in.');
 
-objective('data', function() {
+objective.only('data', function() {
 
 
   before(function(done) {

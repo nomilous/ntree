@@ -230,7 +230,6 @@ Tree.prototype._assemble = Promise.promisify(function(callback) {
 
   local.init(callback);
 
-
 });
 
 
@@ -282,7 +281,7 @@ Tree.prototype._activate = Promise.promisify(function(callback) {
  */
 
 Tree.prototype._notify = function(vertex, change) {
-  console.log('notify', change);
+  this._emitter.emit('$change', change);
 }
 
 

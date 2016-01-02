@@ -796,8 +796,6 @@ Vertex.prototype.onUpdatedKey = function(key, agent, oldValue, newValue) {
   var name = this._info.name;
   var serializer = this._info.serializer;
 
-  console.log('key', key, newValue);
-
   var change = {
     op: 'update',
     key: key,
