@@ -64,5 +64,5 @@ ntree.create({mount: '/path/to/data/root'})
 
 This is not a database.
 
-Reads from updated data fragment (.js) files are synchronous (per `require('filename')`) and will therefore not scale beyond a moderate concurrency.
+Reads (and wites) from updated data fragment (.js) files are synchronous (per `require('filename')`) and will therefore not scale beyond a moderate concurrency.
 

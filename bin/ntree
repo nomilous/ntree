@@ -49,7 +49,7 @@ ntree.create({
     ignoreUndefined: true,
   });
 
-  r.context.$ntree = tree;
+  r.context.$tree = tree;
 
   require('repl.history')(r, process.env.HOME + '/.node_history');
 
