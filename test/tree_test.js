@@ -32,6 +32,12 @@ objective('Tree', function() {
       expect(tree._tools.tree).to.equal(tree);
     });
 
+    it('creates a property for sources', function(Tree, expect) {
+      var opts = {};
+      var tree = new Tree(opts);
+      expect(tree._sources).to.eql({});
+    });
+
     it('creates a property for vertices', function(Tree, expect) {
       var opts = {};
       var tree = new Tree(opts);
@@ -130,6 +136,7 @@ objective('Tree', function() {
 
     it('directs ammended source to _attachDirectory()', function(done, tree, sourceDir, expect) {
       tree.does(function _attachDirectory(source) {
+        expect(source.filePath).to.equal('branch/leaf');
         expect(source.treePath).to.equal('branch/leaf');
         done();
       });
@@ -138,6 +145,7 @@ objective('Tree', function() {
 
     it('directs ammended source to _attachFile()', function(done, tree, sourceFile, expect) {
       tree.does(function _attachFile(source) {
+        expect(source.filePath).to.equal('branch/leaf.js');
         expect(source.treePath).to.equal('branch/leaf');
         expect(source.ext).to.equal('.js');
         expect(source.serializer).to.equal(tree._serializers['.js']);
@@ -150,15 +158,99 @@ objective('Tree', function() {
 
   context('_attachDirectory()', function() {
 
-    it('attaches a vertex with agent to the tree', function(done) {
+    beforeEach(function(Tree) {
+      mock('tree', new Tree({mount: '/path/to/tree'}));
+      mock('sourceDir', {
+        filename: '/path/to/tree/branch/leaf',
+        filePath: 'branch/leaf',
+        treePath: 'branch/leaf',
+        stat: {
+          isDirectory: function() {
+            return true;
+          }
+        }
+      });
+    });
+
+    it('attaches tree reference to source and creates type and route', function(done, tree, sourceDir, expect, Tools) {
+      mock(Tools.prototype).stub(function getNested(){
+        return {};
+      });
+      tree._attachDirectory(sourceDir);
+      expect(tree._sources['branch/leaf']).to.equal(sourceDir);
+      expect(sourceDir.type).to.equal('fs/dir');
+      expect(sourceDir.route).to.eql(['branch', 'leaf']);
       done();
     });
 
+    context('root key', function() {
+
+      it('attaches a Vertex to the tree', function(done, tree, sourceDir, expect, Vertex) {
+        // make route root, (normally branch would already exist by the time brach/leaf is added)
+        sourceDir.filePath = 'branch';
+        sourceDir.treePath = 'branch';
+        tree._attachDirectory(sourceDir);
+        expect(tree._vertices.branch).to.exist;
+        expect(tree._vertices.branch.__).to.be.an.instanceof(Vertex);
+        done();
+      });
+
+      it('attaches the key to the tree referencing the Vertex', function(done, tree, sourceDir, expect) {
+        // make route root, (normally branch would already exist by the time brach/leaf is added)
+        sourceDir.filePath = 'branch';
+        sourceDir.treePath = 'branch';
+        tree._attachDirectory(sourceDir);
+        expect(tree.branch).to.exist;
+        done();
+      });
+
+    });
+
+    context('nested key', function() {
+
+      it('')
+
+    });
+
   });
+
   context('_attachFile()', function() {
 
-    it('attaches a vertex with agent to the tree', function(done) {
+    beforeEach(function(Tree) {
+      mock('tree', new Tree({mount: '/path/to/tree'}));
+      mock('sourceFile', {
+        filename: '/path/to/tree/branch/leaf.js',
+        filePath: 'branch/leaf.js',
+        treePath: 'branch/leaf',
+        stat: {
+          isDirectory: function() {
+            return false;
+          }
+        }
+      });
+    });
+
+    it('attaches tree reference to source and creates type and route', function(done, tree, sourceFile, expect) {
+      tree._attachFile(sourceFile);
+      expect(tree._sources['branch/leaf.js']).to.equal(sourceFile);
+      expect(sourceFile.type).to.equal('fs/file');
+      expect(sourceFile.route).to.eql(['branch', 'leaf']);
       done();
+    });
+
+    context('root key', function() {
+
+      xit('attaches multiple vertices to the tree (if file defines multiple keys)',
+        function(done) {
+        }
+      );
+
+    });
+
+    context('nested key', function() {
+
+      it('');
+
     });
 
   });
