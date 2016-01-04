@@ -35,8 +35,8 @@ ntree.create({
   mount: path.normalize(mountPoint),
   
   watcher: {
-    // chokidar
-    followSymlinks: true,
+    // followSymlinks: true,
+    // more options for watcher: https://github.com/paulmillr/chokidar
   },
   
 
