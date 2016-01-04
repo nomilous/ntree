@@ -33,7 +33,13 @@ var ntree = require('../'); // specifically after env.DEBUG
 
 ntree.create({
   mount: path.normalize(mountPoint),
-  // sourceInterval: 20,
+  
+  watcher: {
+    // chokidar
+    followSymlinks: true,
+  },
+  
+
   // lazy: cmd.lazy,
 })
 

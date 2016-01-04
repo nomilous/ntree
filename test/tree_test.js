@@ -74,16 +74,16 @@ objective('Tree', function() {
       done();
     });
 
-    it('subscribes _attachSource() to $load for _assemble()', function(done, Tree, expect) {
-      var opts = {};
-      mock(Tree.prototype).does(function _attachSource(source) {
-        expect(source).to.equal('SOURCE');
-        done();
-      });
-      var tree = new Tree(opts);
-      expect(tree._emitter._events['$load']).to.be.an.instanceof(Function);
-      tree._emitter.emit('$load', 'SOURCE');
-    });
+    // it('subscribes _attachSource() to $load for _assemble()', function(done, Tree, expect) {
+    //   var opts = {};
+    //   mock(Tree.prototype).does(function _attachSource(source) {
+    //     expect(source).to.equal('SOURCE');
+    //     done();
+    //   });
+    //   var tree = new Tree(opts);
+    //   expect(tree._emitter._events['$load']).to.be.an.instanceof(Function);
+    //   tree._emitter.emit('$load', 'SOURCE');
+    // });
 
   });
 
