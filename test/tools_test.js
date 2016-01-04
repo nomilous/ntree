@@ -5,7 +5,7 @@ objective('Tools', function() {
   });
 
   context('constructor', function() {
-    it('creates tree property from first arg', function(done, Tools, expect) {
+    xit('creates tree property from first arg', function(done, Tools, expect) {
       var tools = new Tools('TREE');
       expect(tools.tree).to.equal('TREE');
       done();
@@ -125,7 +125,6 @@ objective('Tools', function() {
       var tree = {
         outer: {
           nested: {
-
           }
         }
       }

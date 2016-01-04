@@ -29,7 +29,7 @@ objective('Tree', function() {
       var opts = {};
       var tree = new Tree(opts);
       expect(tree._tools).to.be.an.instanceof(Tools);
-      expect(tree._tools.tree).to.equal(tree);
+      // expect(tree._tools.tree).to.equal(tree);
     });
 
     it('creates a property for sources', function(Tree, expect) {
@@ -158,9 +158,10 @@ objective('Tree', function() {
 
   context('_attachDirectory()', function() {
 
-    beforeEach(function(Tree) {
+    beforeEach(function(Tree, SourceType) {
       mock('tree', new Tree({mount: '/path/to/tree'}));
       mock('sourceDir', {
+        type: SourceType.DIRECTORY,
         filename: '/path/to/tree/branch/leaf',
         filePath: 'branch/leaf',
         treePath: 'branch/leaf',
@@ -172,18 +173,23 @@ objective('Tree', function() {
       });
     });
 
-    it('attaches tree reference to source and creates type and route', function(done, tree, sourceDir, expect, Tools) {
-      mock(Tools.prototype).stub(function getNested(){
-        return {};
-      });
-      tree._attachDirectory(sourceDir);
-      expect(tree._sources['branch/leaf']).to.equal(sourceDir);
-      expect(sourceDir.type).to.equal('fs/dir');
-      expect(sourceDir.route).to.eql(['branch', 'leaf']);
-      done();
+    it('attaches tree reference to source and creates type and route',
+      function(done, tree, sourceDir, expect, Tools, SourceType) {
+        mock(Tools.prototype).stub(function getNested(){
+          return {
+            __: {
+              sources: []
+            }
+          };
+        });
+        tree._attachDirectory(sourceDir);
+        expect(tree._sources['branch/leaf']).to.equal(sourceDir);
+        expect(sourceDir.type).to.equal(SourceType.DIRECTORY);
+        expect(sourceDir.route).to.eql(['branch', 'leaf']);
+        done();
     });
 
-    context('root key', function() {
+    context('with root key', function() {
 
       it('attaches a Vertex to the tree', function(done, tree, sourceDir, expect, Vertex) {
         // make route root, (normally branch would already exist by the time brach/leaf is added)
@@ -192,10 +198,11 @@ objective('Tree', function() {
         tree._attachDirectory(sourceDir);
         expect(tree._vertices.branch).to.exist;
         expect(tree._vertices.branch.__).to.be.an.instanceof(Vertex);
+        expect(tree._vertices.branch.__.hasDirectory).to.be.true;
         done();
       });
 
-      it('attaches the key to the tree referencing the Vertex', function(done, tree, sourceDir, expect) {
+      it('attaches the key to the user tree referencing the Vertex', function(done, tree, sourceDir, Tools, expect) {
         // make route root, (normally branch would already exist by the time brach/leaf is added)
         sourceDir.filePath = 'branch';
         sourceDir.treePath = 'branch';
@@ -206,9 +213,32 @@ objective('Tree', function() {
 
     });
 
-    context('nested key', function() {
+    context('with nested key', function() {
 
-      it('')
+      beforeEach(function(tree) {
+        tree.branch = {};
+        tree._vertices.branch = {};
+      });
+
+      it('attaches a Vertex to the tree', function(done, tree, sourceDir, expect, Vertex) {
+        // make route root, (normally branch would already exist by the time brach/leaf is added)
+        sourceDir.filePath = 'branch/leaf';
+        sourceDir.treePath = 'branch/leaf';
+        tree._attachDirectory(sourceDir);
+        expect(tree._vertices.branch.leaf).to.exist;
+        expect(tree._vertices.branch.leaf.__).to.be.an.instanceof(Vertex);
+        expect(tree._vertices.branch.leaf.__.hasDirectory).to.be.true;
+        done();
+      });
+
+      it('attaches the key to the user tree referencing the Vertex', function(done, tree, sourceDir, Tools, expect) {
+        // make route root, (normally branch would already exist by the time brach/leaf is added)
+        sourceDir.filePath = 'branch/leaf';
+        sourceDir.treePath = 'branch/leaf';
+        tree._attachDirectory(sourceDir);
+        expect(tree.branch.leaf).to.exist;
+        done();
+      });
 
     });
 
@@ -216,9 +246,10 @@ objective('Tree', function() {
 
   context('_attachFile()', function() {
 
-    beforeEach(function(Tree) {
+    beforeEach(function(Tree, SourceType) {
       mock('tree', new Tree({mount: '/path/to/tree'}));
       mock('sourceFile', {
+        type: SourceType.FILE,
         filename: '/path/to/tree/branch/leaf.js',
         filePath: 'branch/leaf.js',
         treePath: 'branch/leaf',
@@ -230,29 +261,70 @@ objective('Tree', function() {
       });
     });
 
-    it('attaches tree reference to source and creates type and route', function(done, tree, sourceFile, expect) {
-      tree._attachFile(sourceFile);
-      expect(tree._sources['branch/leaf.js']).to.equal(sourceFile);
-      expect(sourceFile.type).to.equal('fs/file');
-      expect(sourceFile.route).to.eql(['branch', 'leaf']);
-      done();
+    it('attaches tree reference to source and creates type and route',
+      function(done, tree, sourceFile, expect, SourceType, Tools) {
+        mock(Tools.prototype).stub(function getNested(){
+          return {
+            __: {
+              sources: [],
+              loadSource: function() {}
+            }
+          };
+        });
+        tree._attachFile(sourceFile);
+        expect(tree._sources['branch/leaf.js']).to.equal(sourceFile);
+        expect(sourceFile.type).to.equal(SourceType.FILE);
+        expect(sourceFile.route).to.eql(['branch', 'leaf']);
+        done();
     });
 
-    context('root key', function() {
+    context('with root key', function() {
 
-      xit('attaches multiple vertices to the tree (if file defines multiple keys)',
-        function(done) {
+      it('calls vertex.loadSource on the new vertex and attached to vertices and tree',
+        function(done, tree, sourceFile, expect, Vertex) {
+          sourceFile.filePath = 'branch';
+          sourceFile.treePath = 'branch';
+          mock(Vertex.prototype).does(function loadSource(first) {
+            expect(first).to.be.true;
+          })
+          tree._attachFile(sourceFile);
+
+          expect(tree._vertices.branch).to.exist;
+          expect(tree._vertices.branch.__).to.be.an.instanceof(Vertex);
+          expect(tree._vertices.branch.__.hasFile).to.be.true;
+          // expect(tree.branch).to.exist; // not yet
+          done();
         }
       );
 
+      xit('builds file content onto tree', function(done) {
+
+      });
+
+      xit('ammends when existing directory Vertex at same location', function(done) {
+        console.log(vertex) // properly in __?
+
+        // expect(tree._vertices.branch.__.hasFile).to.be.true;
+        // expect(tree._vertices.branch.__.hasDirectory).to.be.true;
+      });
+
     });
 
-    context('nested key', function() {
+    context('with nested key', function() {
 
-      it('');
+      xit('attaches multiple vertices to the tree', function(done) {
+
+      });
+
+      xit('attaches the key to the user tree referencing the Vertex', function(done) {
+        expect(tree.branch).to.eql();
+        done();
+      });
 
     });
 
   });
+
+  xit('collides on neptune?')
 
 });
