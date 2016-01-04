@@ -21,6 +21,7 @@
   "homepage": "https://github.com/nomilous/ntree",
   "dependencies": {
     "bluebird": "^2.10.2",
+    "chokidar": "^1.4.2",
     "commander": "^2.8.1",
     "debug": "^2.2.0",
     "errorize": "^1.0.0",

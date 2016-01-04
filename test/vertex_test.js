@@ -5,11 +5,15 @@ objective('Vertex', function() {
   });
 
   context('constructor', function() {
-    it('has reference to tree and source and vref', function(done, Vertex, expect) {
+    it('has reference to tree and source and vref and agents', function(done, Vertex, expect) {
       var vertex = new Vertex('TREE', 'SOURCE', 'VREF');
       expect(vertex.tree).to.equal('TREE');
       expect(vertex.sources).to.eql(['SOURCE']);
       expect(vertex.vref).to.equal('VREF');
+      expect(vertex.agents).to.eql({
+        sources: [],
+        tree: null,
+      });
       done();
     });
 
@@ -23,7 +27,7 @@ objective('Vertex', function() {
 
     it('has property to store value', function(done, Vertex, expect) {
       var vertex = new Vertex('TREE', 'SOURCE', 'VREF');
-      expect(vertex.value).to.equal(null);
+      expect(vertex.value).to.eql({});
       done();
     });
   });

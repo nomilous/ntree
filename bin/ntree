@@ -11,7 +11,7 @@ cmd.usage('[options] <dir>');
 
 cmd.option('');
 // cmd.option('--lazy',    'use lazy loading');
-cmd.option('--debug',   'print debug info');
+// cmd.option('--debug',   'print debug info');
 cmd.option('--json',    'print json and exit');
 
 cmd.parse(process.argv);
@@ -33,6 +33,7 @@ var ntree = require('../'); // specifically after env.DEBUG
 
 ntree.create({
   mount: path.normalize(mountPoint),
+  // sourceInterval: 20,
   // lazy: cmd.lazy,
 })
 
@@ -51,7 +52,7 @@ ntree.create({
 
   r.context.$tree = tree;
 
-  require('repl.history')(r, process.env.HOME + '/.node_history');
+  require('repl.history')(r, process.env.HOME + '/.ntree_node_history');
 
 })
 

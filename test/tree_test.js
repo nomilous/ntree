@@ -101,7 +101,7 @@ objective('Tree', function() {
   });
 
   context('_assemble()', function() {
-    it('loads the tree by passing the emitter into the recursor', function(done, Tree, expect) {
+    xit('loads the tree by passing the emitter into the recursor', function(done, Tree, expect) {
       var opts = {mount: __dirname};
       var tree = new Tree(opts);
       mock(tree._tools).spy(function readdirRecurseAsync(emitter, filename) {
@@ -297,27 +297,63 @@ objective('Tree', function() {
         }
       );
 
-      xit('builds file content onto tree', function(done) {
+      it('builds file content onto tree', function(done, tree, sourceFile, expect) {
+        mock(sourceFile.serializer = {}).does(function readSync(vertex) {
+          return {
+            key1: 1,
+            key2: 'two',
+            key3: false,
+            key4: function() {
+              return 1
+            },
+            key5: {
+              deeper1: {},
+              deeper2: true
+            },
+            // key6: ['a', 'r', 'r', 'a', 'y'],
+            // key7: new Buffer('dddd'),
+            // key8: new RegExp,
+            // key9: new Date,
+          }
+        });
+        sourceFile.filePath = 'branch';
+        sourceFile.treePath = 'branch';
+        tree._attachFile(sourceFile);
 
+        expect(tree.branch.key1).to.equal(1);
+        expect(tree.branch.key2).to.equal('two');
+        expect(tree.branch.key3).to.equal(false);
+        expect(tree.branch.key4()).to.equal(1);
+        expect(tree.branch.key5.deeper1).to.eql({});
+        expect(tree.branch.key5.deeper2).to.equal(true);
+
+        expect(tree._vertices.branch.key1.__.sources[0]).to.equal(sourceFile);
+        expect(tree._vertices.branch.key5.deeper1.__.sources[0]).to.equal(sourceFile);
+        done();
       });
 
-      xit('ammends when existing directory Vertex at same location', function(done) {
-        console.log(vertex) // properly in __?
+      it('ammends when existing Vertex at same location', function(done, tree, sourceFile, expect) {
+        mock(sourceFile.serializer = {}).does(
+          function readSync(vertex) {
+            return {
+              key1: 1
+            }
+          },
+          function readSync(vertex) {
+            return {
+              key1: 1
+            }
+          }
+        );
 
-        // expect(tree._vertices.branch.__.hasFile).to.be.true;
-        // expect(tree._vertices.branch.__.hasDirectory).to.be.true;
-      });
+        sourceFile.filePath = 'branch';
+        sourceFile.treePath = 'branch';
 
-    });
+        tree._attachFile(sourceFile);
+        expect(tree._vertices.branch.key1.__.sources.length).to.equal(1);
 
-    context('with nested key', function() {
-
-      xit('attaches multiple vertices to the tree', function(done) {
-
-      });
-
-      xit('attaches the key to the user tree referencing the Vertex', function(done) {
-        expect(tree.branch).to.eql();
+        tree._attachFile(sourceFile);
+        expect(tree._vertices.branch.key1.__.sources.length).to.equal(2);
         done();
       });
 
