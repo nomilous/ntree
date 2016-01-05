@@ -7,45 +7,65 @@ objective('Tree', function() {
   context('constructor', function() {
 
     it('has no enumerable properties', function(expect, Tree) {
-      var opts = {};
+      var opts = {
+        mount: 'dir'
+      };
       var tree = new Tree(opts);
       expect(Object.keys(tree)).to.eql([]);
 
     })
 
-    it('creates a property for opts', function(Tree, expect) {
-      var opts = {};
+    it('creates a property for opts with some defaults', function(Tree, expect) {
+      var opts = {
+        mount: 'dir/deeper/'
+      };
       var tree = new Tree(opts);
       expect(tree._opts).to.equal(opts);
+
+      expect(tree._opts.mount).to.equal('dir/deeper'); // without last /
+      expect(tree._opts.syncIn).to.equal(true);
+      expect(tree._opts.syncOut).to.equal(true);
+      expect(tree._opts.watcher.followSymlinks).to.equal(false);
+      expect(tree._opts.agents.scanInterval).to.equal(20);
     });
 
     it('creates sourceMask regex for stripping absolute paths to treePath', function(Tree, expect) {
-      var opts = {};
+      var opts = {
+        mount: 'dir'
+      };
       var tree = new Tree(opts);
       expect(tree._opts.sourceMask).to.be.an.instanceof(RegExp);
     });
 
     it('creates a property for tools', function(Tree, expect, Tools) {
-      var opts = {};
+      var opts = {
+        mount: 'dir'
+      };
       var tree = new Tree(opts);
       expect(tree._tools).to.be.an.instanceof(Tools);
       // expect(tree._tools.tree).to.equal(tree);
     });
 
     it('creates a property for sources', function(Tree, expect) {
-      var opts = {};
+      var opts = {
+        mount: 'dir'
+      };
       var tree = new Tree(opts);
       expect(tree._sources).to.eql({});
     });
 
     it('creates a property for vertices', function(Tree, expect) {
-      var opts = {};
+      var opts = {
+        mount: 'dir'
+      };
       var tree = new Tree(opts);
       expect(tree._vertices).to.eql({});
     });
 
     it('creates a property for serializers and registers defaults', function(done, Tree, Javascript, Directory, expect) {
-      var opts = {};
+      var opts = {
+        mount: 'dir'
+      };
       var tree = new Tree(opts);
       expect(tree._serializers['.js']).to.be.an.instanceof(Javascript);
       expect(tree._serializers['.directory']).to.be.an.instanceof(Directory);
@@ -53,14 +73,18 @@ objective('Tree', function() {
     });
 
     it('creates a property to house the event emitter', function(done, Tree, expect, events) {
-      var opts = {};
+      var opts = {
+        mount: 'dir'
+      };
       var tree = new Tree(opts);
       expect(tree._emitter).to.be.an.instanceof(events.EventEmitter);
       done();
     });
 
     it('creates functions for event subscriptions', function(done, Tree, expect, events) {
-      var opts = {};
+      var opts = {
+        mount: 'dir'
+      };
       var tree = new Tree(opts);
       var event1 = 0, event2 = 0;
       tree.on('event1', function() { event1++; });
@@ -89,7 +113,9 @@ objective('Tree', function() {
 
   context('registerSerializer()', function() {
     it('registers serializers (can decode or encode to storage)', function(done, Tree, expect) {
-      var opts = {};
+      var opts = {
+        mount: 'dir'
+      };
       var tree = new Tree(opts);
       tree.registerSerializer({
         extensions: ['.ldb'],
@@ -443,12 +469,15 @@ objective('Tree', function() {
         }
       });
       mock(Tree.prototype).does(function _activate() {});
-      var tree = new Tree({});
+      var tree = new Tree({
+        mount: 'dir'
+      });
       tree._assemble();
       done();
     });
     it('starts the scanner interval calling into agents', function(done, Tree, bluebird, expect) {
       var tree = {
+        mount: 'dir',
         _opts: {
           agents: {
             scanInterval: 20

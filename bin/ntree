@@ -7,7 +7,7 @@ var mountPoint;
 var scanInterval;
 var followSymlinks;
 
-cmd.usage('[options] <dir>');
+cmd.usage('[options] <directory>');
 
 // cmd.description('eg: ntree --lazy ~/ntree/point');
 
@@ -15,12 +15,29 @@ cmd.option('');
 // cmd.option('--lazy',    'use lazy loading');
 cmd.option('--debug',              'print debug info');
 cmd.option('--json',               'print json and exit');
-cmd.option('--scan-interval [ms]', 'milliseconds between key scans');
+cmd.option('');
 cmd.option('--follow-symlinks',    'be careful of circles');
+cmd.option('');
+cmd.option('--scan-interval [ms]', 'milliseconds between key scans');
+cmd.option('--no-sync-in',         'disable sync from disk to tree');
+cmd.option('--no-sync-out',        'disable sync from tree to disk');
+cmd.option('--no-sync',            'neither in or out');
 
 cmd.parse(process.argv);
 
-mountPoint = cmd.args[0] ? cmd.args[0][0] == '/' ? cmd.args[0] : process.cwd() + path.sep + cmd.args[0] : process.cwd();
+if (!cmd.args[0]) {
+  console.error('\n  Error: missing <directory>');
+  cmd.help();
+  process.exit(1);
+}
+
+
+mountPoint = cmd.args[0]; // ? cmd.args[0][0] == '/' ? cmd.args[0] : process.cwd() + path.sep + cmd.args[0] : process.cwd();
+
+if (path.isAbsolute && path.isAbsolute(mountPoint)) {
+} else if (mountPoint[1] == ':' && mountPoint[2] == '\\') { // windows, does this work in absence of isAbsolute
+} else if (mountPoint[0] == '/') {
+} else mountPoint = path.normalize(process.cwd() + path.sep + mountPoint);
 
 // lazy as true if no mountpoint specified
 // cmd.lazy = cmd.args[0] ? typeof cmd.lazy == 'boolean' ? cmd.lazy : false : true;
@@ -33,13 +50,15 @@ if (cmd.debug) {
   }
 }
 
-scanInterval = typeof cmd.scanInterval === 'undefined' ? 10 : parseInt(cmd.scanInterval);
+scanInterval = typeof cmd.scanInterval === 'undefined' ? 20 : parseInt(cmd.scanInterval);
 followSymlinks = typeof cmd.followSymlinks === 'undefined' ? false : cmd.followSymlinks;
 
 var ntree = require('../'); // intentionally after env.DEBUG
 
 ntree.create({
-  mount: path.normalize(mountPoint),
+  mount: mountPoint,
+  syncIn: cmd.syncIn && cmd.sync,
+  syncOut: cmd.syncOut && cmd.sync,
   agents: {
     scanInterval: scanInterval
   },
@@ -48,7 +67,6 @@ ntree.create({
     // more options for watcher: https://github.com/paulmillr/chokidar
   },
   
-
   // lazy: cmd.lazy,
 })
 

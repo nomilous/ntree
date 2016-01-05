@@ -119,7 +119,13 @@ objective('Vertex', function() {
 
   context('getValue()', function() {
 
-    it('');
+    it('returns vertex.value', function(done, Vertex, expect) {
+      var vertex = {
+        value: 1
+      }
+      expect(Vertex.prototype.getValue.call(vertex)).to.equal(1);
+      done();
+    });
 
   });
 
