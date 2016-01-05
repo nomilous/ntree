@@ -173,6 +173,17 @@ objective('Tree', function() {
       });
     });
 
+    it.only('attaches root source and vertex if source is root', function(done, tree, sourceDir, expect) {
+      sourceDir.root = true;
+      sourceDir.filePath = '';
+      sourceDir.treePath = '';
+      tree._attachDirectory(sourceDir);
+      expect(tree._sources['']).to.equal(sourceDir);
+      expect(tree._vertices.__).to.exist;
+      expect(tree._vertices.__.sources[0]).to.equal(sourceDir);
+      done();
+    });
+
     it('attaches tree reference to source and creates type and route',
       function(done, tree, sourceDir, expect, Tools, SourceType) {
         mock(Tools.prototype).stub(function getNested(){
@@ -261,6 +272,20 @@ objective('Tree', function() {
       });
     });
 
+    it.only('attaches root source and vertex if source is root', function(done, tree, sourceFile, expect) {
+      sourceFile.root = true;
+      sourceFile.filePath = '';
+      sourceFile.treePath = '';
+      sourceFile.serializer = {
+        readSync: function() {}
+      }
+      tree._attachFile(sourceFile);
+      expect(tree._sources['']).to.equal(sourceFile);
+      expect(tree._vertices.__).to.exist;
+      expect(tree._vertices.__.sources[0]).to.equal(sourceFile);
+      done();
+    });
+
     it('attaches tree reference to source and creates type and route',
       function(done, tree, sourceFile, expect, SourceType, Tools) {
         mock(Tools.prototype).stub(function getNested(){
@@ -284,8 +309,9 @@ objective('Tree', function() {
         function(done, tree, sourceFile, expect, Vertex) {
           sourceFile.filePath = 'branch';
           sourceFile.treePath = 'branch';
-          mock(Vertex.prototype).does(function loadSource(first) {
-            expect(first).to.be.true;
+          sourceFile.loading = true;
+          mock(Vertex.prototype).does(function loadSource(loading) {
+            expect(loading).to.be.true;
           })
           tree._attachFile(sourceFile);
 
@@ -359,6 +385,52 @@ objective('Tree', function() {
 
     });
 
+  });
+
+  context('_detatchSource()', function() {
+
+    beforeEach(function(SourceType) {
+      mock('tree', {
+        _sources: {
+          'the/directory': {
+            type: SourceType.DIRECTORY
+          },
+          'the/file.js': {
+            type: SourceType.FILE
+          }
+        },
+        _opts: {
+          sourceMask: new RegExp("^" + '/root/')
+        }
+      })
+    });
+
+    it('directs according to original source type', function(done, Tree, tree, expect) {
+      mock(tree).does(
+        function _detatchDirectory(source) {
+          expect(source).to.equal(tree._sources['the/directory']);
+        },
+        function _detatchFile(source) {
+          expect(source).to.equal(tree._sources['the/file.js']);
+        }  
+      );
+      Tree.prototype._detatchSource.call(tree, {
+        filename: '/root/the/directory'
+      });
+      Tree.prototype._detatchSource.call(tree, {
+        filename: '/root/the/file.js'
+      });
+      done();
+    });
+
+  });
+
+  context('_detatchDirectory()', function() {
+    xit('')
+  });
+
+  context('_detatchFile()', function() {
+    xit('')
   });
 
   xit('collides on neptune?')

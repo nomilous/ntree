@@ -11,7 +11,7 @@ cmd.usage('[options] <dir>');
 
 cmd.option('');
 // cmd.option('--lazy',    'use lazy loading');
-// cmd.option('--debug',   'print debug info');
+cmd.option('--debug',   'print debug info');
 cmd.option('--json',    'print json and exit');
 
 cmd.parse(process.argv);
