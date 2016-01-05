@@ -4,6 +4,8 @@ var cmd = require('commander');
 var path = require('path');
 var repl = require('repl');
 var mountPoint;
+var scanInterval;
+var followSymlinks;
 
 cmd.usage('[options] <dir>');
 
@@ -11,8 +13,10 @@ cmd.usage('[options] <dir>');
 
 cmd.option('');
 // cmd.option('--lazy',    'use lazy loading');
-cmd.option('--debug',   'print debug info');
-cmd.option('--json',    'print json and exit');
+cmd.option('--debug',              'print debug info');
+cmd.option('--json',               'print json and exit');
+cmd.option('--scan-interval [ms]', 'milliseconds between key scans');
+cmd.option('--follow-symlinks',    'be careful of circles');
 
 cmd.parse(process.argv);
 
@@ -29,13 +33,18 @@ if (cmd.debug) {
   }
 }
 
-var ntree = require('../'); // specifically after env.DEBUG
+scanInterval = typeof cmd.scanInterval === 'undefined' ? 10 : parseInt(cmd.scanInterval);
+followSymlinks = typeof cmd.followSymlinks === 'undefined' ? false : cmd.followSymlinks;
+
+var ntree = require('../'); // intentionally after env.DEBUG
 
 ntree.create({
   mount: path.normalize(mountPoint),
-  
+  agents: {
+    scanInterval: scanInterval
+  },
   watcher: {
-    // followSymlinks: true,
+    followSymlinks: followSymlinks,
     // more options for watcher: https://github.com/paulmillr/chokidar
   },
   

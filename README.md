@@ -66,3 +66,9 @@ This is not a database.
 
 Reads (and wites) from updated data fragment (.js) files are synchronous (per `require('filename')`) and will therefore not scale beyond a moderate concurrency.
 
+
+## caveats
+
+removing and adding same key goes undetected... (explain)
+
+

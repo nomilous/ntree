@@ -1,44 +1,53 @@
 objective('Vertex', function() {
 
-  before(function() {
+  before(function(events) {
     mock('expect', require('chai').expect);
+    mock('tree', {
+      _opts: {},
+      _emitter: new events.EventEmitter()
+    })
   });
 
   context('constructor', function() {
-    it('has reference to tree and source and vref and agents', function(done, Vertex, expect) {
-      var vertex = new Vertex('TREE', 'SOURCE', 'VREF');
-      expect(vertex.tree).to.equal('TREE');
+    it('has reference to tree and source and vref', function(done, Vertex, tree, expect) {
+      var vertex = new Vertex(tree, 'SOURCE', 'VREF');
+      expect(vertex.tree).to.equal(tree);
       expect(vertex.sources).to.eql(['SOURCE']);
       expect(vertex.vref).to.equal('VREF');
-      expect(vertex.agents).to.eql({
-        sources: [],
-        tree: null,
-      });
       done();
     });
 
     it('has property to store whether or not vertex has file and/or directory associations',
-      function(done, Vertex, expect) {
-        var vertex = new Vertex('TREE', 'SOURCE', 'VREF');
+      function(done, Vertex, tree, expect) {
+        var vertex = new Vertex(tree, 'SOURCE', 'VREF');
         expect(vertex.hasDirectory).to.equal(null);
         expect(vertex.hasFile).to.equal(null);
         done();
     });
 
-    it('has property to store value', function(done, Vertex, expect) {
-      var vertex = new Vertex('TREE', 'SOURCE', 'VREF');
+    it('has property to store value', function(done, Vertex, tree, expect) {
+      var vertex = new Vertex(tree, 'SOURCE', 'VREF');
       expect(vertex.value).to.eql({});
+      done();
+    });
+
+    it('creates an agent to monitor for new keys', function(done, Vertex, tree, Agent, expect) {
+      tree._opts.agents = {
+        xxx: 1
+      }
+      var vertex = new Vertex(tree, 'SOURCE', 'VREF');
+      expect(vertex.agent).to.be.an.instanceof(Agent);
+      expect(vertex.agent.vertex).to.equal(vertex);
+      expect(vertex.agent.opts).to.equal(tree._opts.agents);
       done();
     });
   });
 
   context('loadSource()', function() {
 
-    beforeEach(function(SourceType, Vertex, Tools) {
-      var tree = mock('tree', {
-        _tools: new Tools(),
-        outer: {}
-      });
+    beforeEach(function(tree, SourceType, Vertex, Tools) {
+      tree._tools = new Tools();
+      tree.outer = {};
       var serializer = mock('serializer', {
         readSync: function() {}
       });

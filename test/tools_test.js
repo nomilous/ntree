@@ -144,4 +144,169 @@ objective('Tools', function() {
     });
   });
 
+  context('diffKeys()', function() {
+
+    beforeEach(function(Tools) {
+      mock('tools', new Tools());
+      mock('old', {
+        one: 1,
+        two: 2,
+        three: 3,
+        four: 4,
+        five: 5
+      });
+      mock('nue', {
+        one: 1,
+        two: 2,
+        three: 3,
+        four: 4,
+        five: 5
+      });
+    })
+
+    // it('returns array of new keys', function(done, tools, expect) {
+    //   var old = {};
+    //   var nue = {
+    //     key1: {},
+    //     key2: {}
+    //   }
+    //   var change = tools.diffKeys(Object.keys(old), Object.keys(nue));
+    //   expect(change.keys).to.eql(['key1', 'key2']);
+    //   done();
+    // });
+
+    it('detects single first key removed', function(done, tools, old, nue, expect) {
+      delete nue.one;
+      var change = tools.diffKeys(Object.keys(old), Object.keys(nue));
+      expect(change.removed).to.eql(['one']);
+      done();
+    });
+
+    it('detects multiple first key removed', function(done, tools, old, nue, expect) {
+      delete nue.one;
+      delete nue.two;
+      var change = tools.diffKeys(Object.keys(old), Object.keys(nue));
+      expect(change.removed).to.eql(['one', 'two']);
+      done();
+    });
+
+    it('detects single first key replaced', function(done, tools, old, nue, expect) {
+      delete nue.one;
+      nue.one = 1;
+      var change = tools.diffKeys(Object.keys(old), Object.keys(nue));
+      expect(change.removed).to.eql(['one']);
+      expect(change.added).to.eql(['one']);
+      done();
+    });
+
+    it('detects multiple first key replaced', function(done, tools, old, nue, expect) {
+      delete nue.one;
+      delete nue.two;
+      nue.one = 1;
+      nue.two = 1;
+      var change = tools.diffKeys(Object.keys(old), Object.keys(nue));
+      expect(change.removed).to.eql(['one', 'two']);
+      expect(change.added).to.eql(['one', 'two']);
+      done();
+    });
+
+
+    it('detects single middle key removed', function(done, tools, old, nue, expect) {
+      delete nue.three;
+      var change = tools.diffKeys(Object.keys(old), Object.keys(nue));
+      expect(change.removed).to.eql(['three']);
+      // expect(change.added).to.eql([]);
+      done();
+    });
+
+    it('detects single middle key replaced', function(done, tools, old, nue, expect) {
+      delete nue.three;
+      nue.three = 3;
+      var change = tools.diffKeys(Object.keys(old), Object.keys(nue));
+      expect(change.removed).to.eql(['three']);
+      expect(change.added).to.eql(['three']);
+      done();
+    });
+
+    it('detects multiple middle key removed', function(done, tools, old, nue, expect) {
+      delete nue.two;
+      delete nue.four;
+      var change = tools.diffKeys(Object.keys(old), Object.keys(nue));
+      expect(change.removed).to.eql(['two', 'four']);
+      done();
+    });
+
+    it('detects multiple middle key replaced', function(done, tools, old, nue, expect) {
+      delete nue.two;
+      delete nue.four;
+      nue.two = 2;
+      nue.four = 4;
+      var change = tools.diffKeys(Object.keys(old), Object.keys(nue));
+      expect(change.removed).to.eql(['two', 'four']);
+      expect(change.added).to.eql(['two', 'four']);
+      done();
+    });
+
+    it('detects single last key removed', function(done, tools, old, nue, expect) {
+      delete nue.five;
+      var change = tools.diffKeys(Object.keys(old), Object.keys(nue));
+      expect(change.removed).to.eql(['five']);
+      done();
+    });
+
+    xit('detects single last key replaced', function(done, tools, old, nue, expect) {
+      delete nue.five;
+      nue.five = 5
+      var change = tools.diffKeys(Object.keys(old), Object.keys(nue));
+      expect(change.removed).to.eql(['five']);
+      expect(change.added).to.eql(['five']);
+      done();
+    });
+
+    it('detects multiple last key removed', function(done, tools, old, nue, expect) {
+      delete nue.five;
+      delete nue.four;
+      var change = tools.diffKeys(Object.keys(old), Object.keys(nue));
+      expect(change.removed).to.eql(['four', 'five']);
+      done();
+    });
+
+    xit('detects multiple last key replaced');
+
+    it('detects single new key', function(done, tools, old, nue, expect) {
+      nue.six = 6
+      var change = tools.diffKeys(Object.keys(old), Object.keys(nue));
+      expect(change.added).to.eql(['six']);
+      done();
+    });
+
+    it('detects multiple new key', function(done, tools, old, nue, expect) {
+      nue.six = 6;
+      nue.seven = 7;
+      var change = tools.diffKeys(Object.keys(old), Object.keys(nue));
+      expect(change.added).to.eql(['six', 'seven']);
+      done();
+    });
+
+    it('detects first key', function(done, tools, old, nue, expect) {
+      var change = tools.diffKeys(Object.keys({}), Object.keys({one: 1}));
+      expect(change.added).to.eql(['one']);
+      done();
+    })
+
+    it('detects all keys removed', function(done, tools, old, nue, expect) {
+      delete nue.one;
+      delete nue.two;
+      delete nue.three;
+      delete nue.four;
+      delete nue.five;
+      var change = tools.diffKeys(Object.keys(old), Object.keys(nue));
+      expect(change.removed).to.eql(['one', 'two', 'three', 'four', 'five']);
+      done();
+    });
+
+    xit('detects all keys replaced');
+
+  });
+
 });

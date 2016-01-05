@@ -173,7 +173,7 @@ objective('Tree', function() {
       });
     });
 
-    it.only('attaches root source and vertex if source is root', function(done, tree, sourceDir, expect) {
+    it('attaches root source and vertex if source is root', function(done, tree, sourceDir, expect) {
       sourceDir.root = true;
       sourceDir.filePath = '';
       sourceDir.treePath = '';
@@ -272,7 +272,7 @@ objective('Tree', function() {
       });
     });
 
-    it.only('attaches root source and vertex if source is root', function(done, tree, sourceFile, expect) {
+    it('attaches root source and vertex if source is root', function(done, tree, sourceFile, expect) {
       sourceFile.root = true;
       sourceFile.filePath = '';
       sourceFile.treePath = '';
@@ -432,6 +432,44 @@ objective('Tree', function() {
   context('_detatchFile()', function() {
     xit('')
   });
+
+  context('_activate()', function() {
+    it('is called on ready watcher', function(done, Tree, chokidar) {
+      chokidar.does(function watch() {
+        return {
+          on: function(event, handler) {
+            if (event === 'ready') handler();
+          }
+        }
+      });
+      mock(Tree.prototype).does(function _activate() {});
+      var tree = new Tree({});
+      tree._assemble();
+      done();
+    });
+    it('starts the scanner interval calling into agents', function(done, Tree, bluebird, expect) {
+      var tree = {
+        _opts: {
+          agents: {
+            scanInterval: 20
+          }
+        },
+        _vertices: {
+          __: {
+            agent: {
+              scan: function(token) {
+                expect(token.vertices).to.equal(0);
+                clearInterval(tree._scanner);
+                done();
+                return new bluebird(function() {});
+              }
+            }
+          }
+        }
+      }
+      Tree.prototype._activate.call(tree);
+    });
+  })
 
   xit('collides on neptune?')
 
