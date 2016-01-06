@@ -96,7 +96,7 @@ objective('SolarSystem', function(path) {
   });
 
 
-  context('syncIn', function() {
+  context.only('syncIn', function() {
 
     context('new source files/dirs', function() {
       it('');
@@ -108,20 +108,24 @@ objective('SolarSystem', function(path) {
 
     context('deleted source files/dirs', function() {
 
+      it('emits diff');
+
+      it('parent is broken, need route on vertex', function() {
+        throw new Error('pend');
+      });
+
       it('deletes from tree when source deleted (file, no path overlap, nested)',
         // deletes pluto.js (has no overlap with directory or other js files)
         function(done, expect, ntree, SolarSystem, fs, path) {
           ntree.create(MOUNT).then(function(tree) {
 
+            var deletefile = path.normalize(MOUNT + '/dwarf_planets/pluto.js');
             var tref = tree.dwarf_planets.pluto; // these get deleted when file is deleted
             var vref = tree._vertices.dwarf_planets.pluto;
 
             delete SolarSystem.dwarf_planets.pluto; // delete from test reference
-
-            var plutojs = path.normalize(MOUNT + '/dwarf_planets/pluto.js');
-            var listener;
-            tree.on('$unload', listener = function(source) {
-              tree._emitter.removeListener('$unload', listener);
+            
+            tree.on('$unload', function() {
               try {
                 expect(JSON.stringify(tree)).to.equal(JSON.stringify(SolarSystem));
                 expect(tree._vertices.dwarf_planets.pluto).to.not.exist;
@@ -137,7 +141,7 @@ objective('SolarSystem', function(path) {
               done();
             });
 
-            fs.unlink(plutojs, function(err) {
+            fs.unlink(deletefile, function(err) {
               if (err) return done(err);
             });
           }).catch(done);
@@ -146,7 +150,32 @@ objective('SolarSystem', function(path) {
       it('deletes from tree when source deleted (file, has path overlap, nested)',
         // deletes inner.js which overlaps paths all the way to inner/earth/radius
         function(done, expect, ntree, SolarSystem, fs, path) {
-          done();
+          ntree.create(MOUNT).then(function(tree) {
+
+            var deletefile = path.normalize(MOUNT + '/planets/inner.js');
+            // these get __partially__ deleted when file is deleted because
+            // part of the content comes other (not deleted) files and dirs
+            var tref = tree.planets.inner;
+            var vref = tree._vertices.planets.inner;
+            // console.log(vref);
+            // console.log(tref);
+
+            // TODO: new keys added may have been stored in ??? when overlapping paths
+            //       !!complicating which should be deleted when overlapping
+            //       !!use last file source to determine
+
+            // create expected (post deletion) solar system
+            delete SolarSystem.planets.inner.earth.radius;
+
+            tree.on('$unload', function() {
+              tree._stop();
+              done();
+            });
+
+            fs.unlink(deletefile, function(err) {
+              if (err) return done(err);
+            });
+          }).catch(done);
       });
 
       xit('deletes from tree when source deleted (file, has path overlap, root)',

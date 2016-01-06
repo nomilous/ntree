@@ -9,9 +9,10 @@ objective('Vertex', function() {
   });
 
   context('constructor', function() {
-    it('has reference to tree and source and vref', function(done, Vertex, tree, expect) {
-      var vertex = new Vertex(tree, 'SOURCE', 'VREF');
+    it('has reference to tree and key and source and vref', function(done, Vertex, tree, expect) {
+      var vertex = new Vertex(tree, 'KEY', 'SOURCE', 'VREF');
       expect(vertex.tree).to.equal(tree);
+      expect(vertex.key).to.equal('KEY');
       expect(vertex.sources).to.eql(['SOURCE']);
       expect(vertex.vref).to.equal('VREF');
       done();
@@ -19,14 +20,14 @@ objective('Vertex', function() {
 
     it('has property to store whether or not vertex has file and/or directory associations',
       function(done, Vertex, tree, expect) {
-        var vertex = new Vertex(tree, 'SOURCE', 'VREF');
+        var vertex = new Vertex(tree, 'KEY', 'SOURCE', 'VREF');
         expect(vertex.hasDirectory).to.equal(null);
         expect(vertex.hasFile).to.equal(null);
         done();
     });
 
     it('has property to store value', function(done, Vertex, tree, expect) {
-      var vertex = new Vertex(tree, 'SOURCE', 'VREF');
+      var vertex = new Vertex(tree, 'KEY', 'SOURCE', 'VREF');
       expect(vertex.value).to.eql({});
       done();
     });
@@ -35,7 +36,7 @@ objective('Vertex', function() {
       tree._opts.agents = {
         xxx: 1
       }
-      var vertex = new Vertex(tree, 'SOURCE', 'VREF');
+      var vertex = new Vertex(tree, 'KEY', 'SOURCE', 'VREF');
       expect(vertex.agent).to.be.an.instanceof(Agent);
       expect(vertex.agent.vertex).to.equal(vertex);
       expect(vertex.agent.opts).to.equal(tree._opts.agents);
@@ -56,7 +57,7 @@ objective('Vertex', function() {
         serializer: serializer
       });
       var vref = mock('vref', {});
-      var vertex = new Vertex(tree, source, vref);
+      var vertex = new Vertex(tree, 'KEY', source, vref);
       vref.__ = vertex
       mock('vertex', vertex);
       vertex.value = tree.outer;
