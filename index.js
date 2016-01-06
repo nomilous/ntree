@@ -16,7 +16,7 @@ module.exports.create = function(opts) {
     
     var tree = new Tree(opts);
 
-    tree._assemble().then(resolve).catch(reject);
+    tree._start().then(resolve).catch(reject);
 
   });
 

@@ -116,6 +116,12 @@ objective('Vertex', function() {
 
   });
 
+  context('unloadSource', function() {
+    it('removes all reference to the key if the unloading source is the only source');
+    it('when removing it sets detached and all children');
+    it('removes the source from sources if more than on source');
+  });
+
 
   context('getValue()', function() {
 

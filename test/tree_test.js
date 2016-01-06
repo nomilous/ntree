@@ -98,7 +98,7 @@ objective('Tree', function() {
       done();
     });
 
-    // it('subscribes _attachSource() to $load for _assemble()', function(done, Tree, expect) {
+    // it('subscribes _attachSource() to $load for _start()', function(done, Tree, expect) {
     //   var opts = {};
     //   mock(Tree.prototype).does(function _attachSource(source) {
     //     expect(source).to.equal('SOURCE');
@@ -126,7 +126,7 @@ objective('Tree', function() {
     });
   });
 
-  context('_assemble()', function() {
+  context('_start()', function() {
     xit('loads the tree by passing the emitter into the recursor', function(done, Tree, expect) {
       var opts = {mount: __dirname};
       var tree = new Tree(opts);
@@ -134,7 +134,7 @@ objective('Tree', function() {
         expect(emitter).to.equal(tree._emitter);
         expect(filename).to.equal(__dirname);
       })
-      tree._assemble().then(done).catch(done);
+      tree._start().then(done).catch(done);
     });
   });
 
@@ -464,6 +464,9 @@ objective('Tree', function() {
       chokidar.does(function watch() {
         return {
           on: function(event, handler) {
+            
+          },
+          once: function(event, handler) {
             if (event === 'ready') handler();
           }
         }
@@ -472,7 +475,7 @@ objective('Tree', function() {
       var tree = new Tree({
         mount: 'dir'
       });
-      tree._assemble();
+      tree._start();
       done();
     });
     it('starts the scanner interval calling into agents', function(done, Tree, bluebird, expect) {
@@ -499,6 +502,10 @@ objective('Tree', function() {
       Tree.prototype._activate.call(tree);
     });
   })
+
+  xit('can be stopped cleanly', function() {
+    // syncIn, syncOut false, delete
+  });
 
   xit('collides on neptune?')
 

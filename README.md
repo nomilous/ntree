@@ -18,13 +18,9 @@ TODO: It synchronizes changes: file system ---> `tree`
 
 TODO: It synchronizes changes: file system <--- `tree`
 
-TODO: It follows symlinks
-
 TODO: It supports functions.
 
 TODO: It emits change events.
-
-TODO: Maintain key order.
 
 TODO: Standardize change op names (json patch?)
 
