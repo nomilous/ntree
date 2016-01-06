@@ -12,6 +12,8 @@ It assembles a `tree` of data from fragments recursed out of the `config.mount` 
 
 Each fragment is a node/javascript file with data per whatever it `module.exports`.
 
+TODO: add .json
+
 TODO: It synchronizes changes: file system ---> `tree`
 
 TODO: It synchronizes changes: file system <--- `tree`
@@ -25,6 +27,10 @@ TODO: It emits change events.
 TODO: Maintain key order.
 
 TODO: Standardize change op names (json patch?)
+
+TODO: What happens on orphaned branch when still got ref but deleted nearer root (in tree, on disk)
+
+TODO: Delete renames to .YYMMDD.HHMMSS.mmm.deleted
 
 ## eg.
 
@@ -69,6 +75,4 @@ Reads (and wites) from updated data fragment (.js) files are synchronous (per `r
 
 ## caveats
 
-removing and adding same key goes undetected... (explain)
-
-
+removing and adding same key goes undetected... (explain) 
