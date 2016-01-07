@@ -108,6 +108,8 @@ objective('SolarSystem', function(path) {
 
     context('deleted source files/dirs', function() {
 
+      it('remembers which source for removing keys added after start');
+
       it('emits diff');
 
       it('deletes from tree when source deleted (file, no path overlap, nested)',
@@ -123,7 +125,7 @@ objective('SolarSystem', function(path) {
             
             tree.on('$unload', function() {
               try {
-                expect(JSON.stringify(tree)).to.equal(JSON.stringify(SolarSystem));
+                expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
                 expect(tree._vertices.dwarf_planets.pluto).to.not.exist;
 
                 expect(vref.__.deleted).to.be.true;
@@ -166,7 +168,7 @@ objective('SolarSystem', function(path) {
             tree.on('$unload', function() {
               tree._stop();
               try {
-                expect(JSON.stringify(tree)).to.equal(JSON.stringify(SolarSystem));
+                expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
                 expect(tree._vertices.planets.inner.earth.raduis).to.not.exist;
 
                 expect(tree._vertices.planets.inner.__.sources.length).to.equal(2);
@@ -190,33 +192,184 @@ objective('SolarSystem', function(path) {
           }).catch(done);
       });
 
-      xit('deletes from tree when source deleted (file, has path overlap, root)',
+      it('deletes from tree when source deleted (file, has path overlap, root)',
         // deletes planets.js which overlaps extensively and is a key on the root
-        function(done) {
+        function(done, expect, ntree, SolarSystem, fs, path) {
+          ntree.create(MOUNT).then(function(tree) {
+
+            expect(tree._vertices.planets.__.sources.length).to.equal(2);
+            expect(tree._vertices.planets.__.sources[0].filePath).to.equal('planets');
+            expect(tree._vertices.planets.__.sources[1].filePath).to.equal('planets.js');
+
+            expect(tree._vertices.planets.inner.__.sources.length).to.equal(3);
+            expect(tree._vertices.planets.inner.__.sources[0].filePath).to.equal('planets.js');
+            expect(tree._vertices.planets.inner.__.sources[1].filePath).to.equal('planets/inner');
+            expect(tree._vertices.planets.inner.__.sources[2].filePath).to.equal('planets/inner.js');
+
+            var deletefile = path.normalize(MOUNT + '/planets.js');
+
+            // create expected (post deletion) solar system
+            delete SolarSystem.planets.inner.venus;
+            delete SolarSystem.planets.inner.earth.name;
+            delete SolarSystem.planets.inner.mars;
+            delete SolarSystem.planets.outer.saturn.name;
+            delete SolarSystem.planets.outer.uranus;
+            delete SolarSystem.planets.outer.neptune.radius; // TODO: name also defined in neptune/name.js (collides???)
+
+            tree.on('$unload', function() {
+              tree._stop();
+              try {
+                expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
+                expect(tree._vertices.planets.inner.venus).to.not.exist;
+                expect(tree._vertices.planets.inner.earth.name).to.not.exist;
+                expect(tree._vertices.planets.inner.mars).to.not.exist;
+                expect(tree._vertices.planets.outer.saturn.name).to.not.exist;
+                expect(tree._vertices.planets.outer.saturn.radius).to.exist;
+                expect(tree._vertices.planets.outer.uranus).to.not.exist;
+                expect(tree._vertices.planets.outer.neptune.radius).to.not.exist;
+
+                expect(tree._vertices.planets.__.sources.length).to.equal(1);
+                expect(tree._vertices.planets.__.sources[0].filePath).to.equal('planets');
+
+                expect(tree._vertices.planets.inner.__.sources.length).to.equal(2);
+                expect(tree._vertices.planets.inner.__.sources[0].filePath).to.equal('planets/inner');
+                expect(tree._vertices.planets.inner.__.sources[1].filePath).to.equal('planets/inner.js');
+
+                // expect(tree._vertices.planets.inner.earth.__.sources.length).to.equal(1);
+                // expect(tree._vertices.planets.inner.earth.__.sources[0].filePath).to.equal('planets.js');
+
+                // expect(tree._vertices.planets.inner.earth.name.__.sources.length).to.equal(1);
+                // expect(tree._vertices.planets.inner.earth.name.__.sources[0].filePath).to.equal('planets.js');
+              } catch (e) {
+                return done(e);
+              }
+              done();
+            });
+
+            fs.unlink(deletefile, function(err) {
+              if (err) return done(err);
+            });
+          }).catch(done);
       });
 
-      xit('deletes from tree when source deleted (directory, no overlap, nested)',
+      it('deletes from tree when source deleted (directory, no overlap, nested)',
         // deletes dwarf_planets/makemake which has no overlaps defined in ancestor
-        function(done) {
+        function(done, expect, ntree, SolarSystem, rimraf, path) {
+          ntree.create(MOUNT).then(function(tree) {
 
+            var deletefile = path.normalize(MOUNT + '/dwarf_planets/makemake');
+
+            // create expected (post deletion) solar system
+            delete SolarSystem.dwarf_planets.makemake;
+
+            tree.on('$unload', function(source) {
+              if (source.filename !== deletefile) return;
+              tree._stop();
+              try {
+                expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
+                expect(tree._vertices.dwarf_planets.makemake).to.not.exist;
+              } catch (e) {
+                return done(e);
+              }
+              done();
+            });
+
+            rimraf(deletefile, function(err) {
+              if (err) return done(err);
+            });
+          }).catch(done);
       });
 
-      xit('deletes from tree when source deleted (directory, no overlap, root)',
+      it('deletes from tree when source deleted (directory, no overlap, root)',
         // deletes dwarf_planets which has no overlaps defined in ancestor and is a key on root
-        function(done) {
+        function(done, expect, ntree, SolarSystem, rimraf, path) {
+          ntree.create(MOUNT).then(function(tree) {
 
+            var deletefile = path.normalize(MOUNT + '/dwarf_planets');
+
+            // create expected (post deletion) solar system
+            delete SolarSystem.dwarf_planets;
+
+            tree.on('$unload', function(source) {
+              if (source.filename !== deletefile) return;
+              tree._stop();
+              try {
+                expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
+                expect(tree._vertices.dwarf_planets).to.not.exist;
+              } catch (e) {
+                return done(e);
+              }
+              done();
+            });
+
+            rimraf(deletefile, function(err) {
+              if (err) return done(err);
+            });
+          }).catch(done);
       });
 
-      xit('deletes from tree when source deleted (directory, has path overlap, nested)',
+      it('deletes from tree when source deleted (directory, has path overlap, nested)',
         // deletes planets/inner which has much overlap defined in ancestor
-        function(done) {
-          
+        function(done, expect, ntree, SolarSystem, rimraf, path) {
+          ntree.create(MOUNT).then(function(tree) {
+
+            var deletefile = path.normalize(MOUNT + '/planets/inner');
+
+            // create expected (post deletion) solar system
+            delete SolarSystem.planets.inner.mercury;
+
+            tree.on('$unload', function(source) {
+              if (source.filename !== deletefile) return;
+              tree._stop();
+              try {
+                expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
+                expect(tree._vertices.planets.inner.mercury).to.not.exist;
+
+                expect(tree._vertices.planets.inner.__.sources.length).to.equal(2);
+                expect(tree._vertices.planets.inner.__.sources[0].filePath).to.equal('planets.js');
+                expect(tree._vertices.planets.inner.__.sources[1].filePath).to.equal('planets/inner.js');
+              } catch (e) {
+                return done(e);
+              }
+              done();
+            });
+
+            rimraf(deletefile, function(err) {
+              if (err) return done(err);
+            });
+          }).catch(done);
       });
 
-      xit('deletes from tree when source deleted (directory, no path overlap, root)',
+      it('deletes from tree when source deleted (directory, no path overlap, root)',
         // deletes sun which has overlaps defined in ancestor and is a key on root
-        function(done) {
-          
+        function(done, expect, ntree, SolarSystem, rimraf, path) {
+          ntree.create(MOUNT).then(function(tree) {
+
+            var deletefile = path.normalize(MOUNT + '/sun');
+
+            // create expected (post deletion) solar system
+            delete SolarSystem.sun.radius;
+
+            tree.on('$unload', function(source) {
+              if (source.filename !== deletefile) return;
+              tree._stop();
+              try {
+                expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
+                expect(tree._vertices.sun.radius).to.not.exist;
+
+                expect(tree._vertices.sun.__.sources.length).to.equal(1);
+                expect(tree._vertices.sun.__.sources[0].filePath).to.equal('sun.js');
+                // expect(tree._vertices.planets.inner.__.sources[1].filePath).to.equal('planets/inner.js');
+              } catch (e) {
+                return done(e);
+              }
+              done();
+            });
+
+            rimraf(deletefile, function(err) {
+              if (err) return done(err);
+            });
+          }).catch(done);
       });
 
     });

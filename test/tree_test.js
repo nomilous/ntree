@@ -37,15 +37,6 @@ objective('Tree', function() {
       expect(tree._opts.sourceMask).to.be.an.instanceof(RegExp);
     });
 
-    it('creates a property for tools', function(Tree, expect, Tools) {
-      var opts = {
-        mount: 'dir'
-      };
-      var tree = new Tree(opts);
-      expect(tree._tools).to.be.an.instanceof(Tools);
-      // expect(tree._tools.tree).to.equal(tree);
-    });
-
     it('creates a property for sources', function(Tree, expect) {
       var opts = {
         mount: 'dir'
@@ -413,7 +404,7 @@ objective('Tree', function() {
 
   });
 
-  context('_detatchSource()', function() {
+  context('_detachSource()', function() {
 
     beforeEach(function(SourceType) {
       mock('tree', {
@@ -435,17 +426,17 @@ objective('Tree', function() {
       var dir = tree._sources['the/directory'];
       var file = tree._sources['the/file.js'];
       mock(tree).does(
-        function _detatchDirectory(source) {
+        function _detachDirectory(source) {
           expect(source).to.equal(dir);
         },
-        function _detatchFile(source) {
+        function _detachFile(source) {
           expect(source).to.equal(file);
         }  
       );
-      Tree.prototype._detatchSource.call(tree, {
+      Tree.prototype._detachSource.call(tree, {
         filename: '/root/the/directory'
       });
-      Tree.prototype._detatchSource.call(tree, {
+      Tree.prototype._detachSource.call(tree, {
         filename: '/root/the/file.js'
       });
       done();
@@ -453,11 +444,11 @@ objective('Tree', function() {
 
   });
 
-  context('_detatchDirectory()', function() {
+  context('_detachDirectory()', function() {
     xit('')
   });
 
-  context('_detatchFile()', function() {
+  context('_detachFile()', function() {
     xit('')
   });
 
