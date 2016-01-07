@@ -309,4 +309,22 @@ objective('Tools', function() {
 
   });
 
+  context('conditionalDelete()', function() {
+
+    it('removes specific elements from array', function(done, Tools, expect) {
+      var tools = new Tools();
+      var array = [{n:1, x:true}, {n:2, x:false}, {n:3, x:false}, {n:4, x:true}];
+      var comparator = function(a) {
+        return a.x
+      };
+      tools.conditionalDelete(array, comparator);
+      expect(array).to.eql([
+        {n:2, x:false},
+        {n:3, x:false}
+      ]);
+      done();
+    });
+
+  });
+
 });

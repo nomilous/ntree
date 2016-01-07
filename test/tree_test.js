@@ -432,12 +432,14 @@ objective('Tree', function() {
     });
 
     it('directs according to original source type', function(done, Tree, tree, expect) {
+      var dir = tree._sources['the/directory'];
+      var file = tree._sources['the/file.js'];
       mock(tree).does(
         function _detatchDirectory(source) {
-          expect(source).to.equal(tree._sources['the/directory']);
+          expect(source).to.equal(dir);
         },
         function _detatchFile(source) {
-          expect(source).to.equal(tree._sources['the/file.js']);
+          expect(source).to.equal(file);
         }  
       );
       Tree.prototype._detatchSource.call(tree, {

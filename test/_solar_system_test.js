@@ -96,7 +96,7 @@ objective('SolarSystem', function(path) {
   });
 
 
-  context.only('syncIn', function() {
+  context('syncIn', function() {
 
     context('new source files/dirs', function() {
       it('');
@@ -109,10 +109,6 @@ objective('SolarSystem', function(path) {
     context('deleted source files/dirs', function() {
 
       it('emits diff');
-
-      it('parent is broken, need route on vertex', function() {
-        throw new Error('pend');
-      });
 
       it('deletes from tree when source deleted (file, no path overlap, nested)',
         // deletes pluto.js (has no overlap with directory or other js files)
@@ -169,6 +165,22 @@ objective('SolarSystem', function(path) {
 
             tree.on('$unload', function() {
               tree._stop();
+              try {
+                expect(JSON.stringify(tree)).to.equal(JSON.stringify(SolarSystem));
+                expect(tree._vertices.planets.inner.earth.raduis).to.not.exist;
+
+                expect(tree._vertices.planets.inner.__.sources.length).to.equal(2);
+                expect(tree._vertices.planets.inner.__.sources[0].filePath).to.equal('planets.js');
+                expect(tree._vertices.planets.inner.__.sources[1].filePath).to.equal('planets/inner');
+
+                expect(tree._vertices.planets.inner.earth.__.sources.length).to.equal(1);
+                expect(tree._vertices.planets.inner.earth.__.sources[0].filePath).to.equal('planets.js');
+
+                expect(tree._vertices.planets.inner.earth.name.__.sources.length).to.equal(1);
+                expect(tree._vertices.planets.inner.earth.name.__.sources[0].filePath).to.equal('planets.js');
+              } catch (e) {
+                return done(e);
+              }
               done();
             });
 
