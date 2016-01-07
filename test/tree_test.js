@@ -418,11 +418,12 @@ objective('Tree', function() {
         },
         _opts: {
           sourceMask: new RegExp("^" + '/root/')
-        }
+        },
+        _emitter: mock('emitter')
       })
     });
 
-    it('directs according to original source type', function(done, Tree, tree, expect) {
+    it('directs according to original source type', function(done, Tree, tree, emitter, expect) {
       var dir = tree._sources['the/directory'];
       var file = tree._sources['the/file.js'];
       mock(tree).does(
@@ -433,6 +434,23 @@ objective('Tree', function() {
           expect(source).to.equal(file);
         }  
       );
+      // emitter.does(
+      //   function emit(event, data) {
+      //     expect(event).to.equal('$patch');
+      //     // TODO: untested patch
+      //     expect(data).to.eql({
+      //       doc: undefined,
+      //       patch: []
+      //     });
+      //   },
+      //   function emit(event, data) {
+      //     expect(event).to.equal('$patch');
+      //     expect(data).to.eql({
+      //       doc: undefined,
+      //       patch: []
+      //     });
+      //   }
+      // )
       Tree.prototype._detachSource.call(tree, {
         filename: '/root/the/directory'
       });

@@ -123,8 +123,22 @@ objective('SolarSystem', function(path) {
 
             delete SolarSystem.dwarf_planets.pluto; // delete from test reference
             
-            tree.on('$unload', function() {
+            tree.on('$patch', function(patch) {
+              tree._stop();
               try {
+
+                expect(patch).to.eql({
+                  doc: 'dwarf_planets/pluto',
+                  patch: [{
+                    op: 'remove',
+                    path: '',
+                    value: {
+                      name: 'Pluto',
+                      radius: 1186000
+                    }
+                  }]
+                });
+
                 expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
                 expect(tree._vertices.dwarf_planets.pluto).to.not.exist;
 
@@ -165,9 +179,19 @@ objective('SolarSystem', function(path) {
             // create expected (post deletion) solar system
             delete SolarSystem.planets.inner.earth.radius;
 
-            tree.on('$unload', function() {
+            tree.on('$patch', function(patch) {
               tree._stop();
               try {
+
+                expect(patch).to.eql({
+                  doc: 'planets/inner',
+                  patch: [{
+                    op: 'remove',
+                    path: '/earth/radius',
+                    value: 6371000
+                  }]
+                });
+
                 expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
                 expect(tree._vertices.planets.inner.earth.raduis).to.not.exist;
 
@@ -216,9 +240,56 @@ objective('SolarSystem', function(path) {
             delete SolarSystem.planets.outer.uranus;
             delete SolarSystem.planets.outer.neptune.radius; // TODO: name also defined in neptune/name.js (collides???)
 
-            tree.on('$unload', function() {
+            tree.on('$patch', function(patch) {
               tree._stop();
               try {
+
+                expect(patch).to.eql({
+                  doc: 'planets',
+                  patch: [
+                    {
+                      op: 'remove',
+                      path: '/inner/venus',
+                      value: {
+                        name: 'Venus',
+                        radius: 6052000
+                      }
+                    },
+                    {
+                      op: 'remove',
+                      path: '/inner/earth/name',
+                      value: 'Earth'
+                    },
+                    {
+                      op: 'remove',
+                      path: '/inner/mars',
+                      value: {
+                        name: 'Mars',
+                        radius: 3390000
+                      }
+                    },
+                    {
+                      op: 'remove',
+                      path: '/outer/saturn/name',
+                      value: 'Saturn'
+                    },
+                    {
+                      op: 'remove',
+                      path: '/outer/uranus',
+                      value: {
+                        name: 'Uranus',
+                        radius: 25362000
+                      }
+                    },
+                    {
+                      op: 'remove',
+                      // name still defined in neptune/name.js
+                      path: '/outer/neptune/radius',
+                      value: 24622000
+                    }
+                  ]
+                });
+
                 expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
                 expect(tree._vertices.planets.inner.venus).to.not.exist;
                 expect(tree._vertices.planets.inner.earth.name).to.not.exist;
@@ -234,12 +305,6 @@ objective('SolarSystem', function(path) {
                 expect(tree._vertices.planets.inner.__.sources.length).to.equal(2);
                 expect(tree._vertices.planets.inner.__.sources[0].filePath).to.equal('planets/inner');
                 expect(tree._vertices.planets.inner.__.sources[1].filePath).to.equal('planets/inner.js');
-
-                // expect(tree._vertices.planets.inner.earth.__.sources.length).to.equal(1);
-                // expect(tree._vertices.planets.inner.earth.__.sources[0].filePath).to.equal('planets.js');
-
-                // expect(tree._vertices.planets.inner.earth.name.__.sources.length).to.equal(1);
-                // expect(tree._vertices.planets.inner.earth.name.__.sources[0].filePath).to.equal('planets.js');
               } catch (e) {
                 return done(e);
               }
@@ -262,10 +327,44 @@ objective('SolarSystem', function(path) {
             // create expected (post deletion) solar system
             delete SolarSystem.dwarf_planets.makemake;
 
+            var patched = [];
+            tree.on('$patch', function(patch) {
+              patched.push(patch);
+            });
+
             tree.on('$unload', function(source) {
               if (source.filename !== deletefile) return;
               tree._stop();
               try {
+
+                // TODO: single delete of dir results in multiple emits, a way to not?
+                expect(patched).to.eql([
+                  {
+                    doc: 'dwarf_planets/makemake/name',
+                    patch: [{
+                      op: 'remove',
+                      path: '',
+                      value: 'Makemake'
+                    }]
+                  },
+                  {
+                    doc: 'dwarf_planets/makemake/radius',
+                    patch: [{
+                      op: 'remove',
+                      path: '',
+                      value: 739000
+                    }]
+                  },
+                  {
+                    doc: 'dwarf_planets/makemake',
+                    patch: [{
+                      op: 'remove',
+                      path: '',
+                      value: {}
+                    }]
+                  }
+                ])
+
                 expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
                 expect(tree._vertices.dwarf_planets.makemake).to.not.exist;
               } catch (e) {
@@ -290,10 +389,85 @@ objective('SolarSystem', function(path) {
             // create expected (post deletion) solar system
             delete SolarSystem.dwarf_planets;
 
+            var patched = [];
+            tree.on('$patch', function(patch) {
+              patched.push(patch);
+            });
+
             tree.on('$unload', function(source) {
               if (source.filename !== deletefile) return;
               tree._stop();
               try {
+
+                expect(patched).to.eql([
+                  {
+                    doc: "dwarf_planets/eris",
+                    patch: [
+                      {
+                        op: "remove",
+                        path: "",
+                        value: {
+                          name: "Eris",
+                          radius: 1163000
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    doc: "dwarf_planets/pluto",
+                    patch: [
+                      {
+                        op: "remove",
+                        path: "",
+                        value: {
+                          name: "Pluto",
+                          radius: 1186000
+                        }
+                      }
+                    ]
+                  },
+                  {
+                    doc: "dwarf_planets/makemake/name",
+                    patch: [
+                      {
+                        op: "remove",
+                        path: "",
+                        value: "Makemake"
+                      }
+                    ]
+                  },
+                  {
+                    doc: "dwarf_planets/makemake/radius",
+                    patch: [
+                      {
+                        op: "remove",
+                        path: "",
+                        value: 739000
+                      }
+                    ]
+                  },
+                  {
+                    doc: "dwarf_planets/makemake",
+                    patch: [
+                      {
+                        op: "remove",
+                        path: "",
+                        value: {}
+                      }
+                    ]
+                  },
+                  {
+                    doc: "dwarf_planets",
+                    patch: [
+                      {
+                        op: "remove",
+                        path: "",
+                        value: {}
+                      }
+                    ]
+                  }
+                ]);
+
                 expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
                 expect(tree._vertices.dwarf_planets).to.not.exist;
               } catch (e) {
@@ -318,10 +492,40 @@ objective('SolarSystem', function(path) {
             // create expected (post deletion) solar system
             delete SolarSystem.planets.inner.mercury;
 
+            var patched = [];
+            tree.on('$patch', function(patch) {
+              patched.push(patch);
+            });
+
             tree.on('$unload', function(source) {
               if (source.filename !== deletefile) return;
               tree._stop();
               try {
+
+                expect(patched).to.eql([
+                  {
+                    doc: 'planets/inner/mercury',
+                    patch: [
+                      {
+                        op: 'remove',
+                        path: '',
+                        value: {
+                          name: 'Mercury',
+                          radius: 2440000
+                        }
+                      }
+                    ]
+                  },
+                  // { // still defined in planets and inner.js
+                  //   doc: 'planets/inner',
+                  //   patch: [{
+                  //     op: 'remove',
+                  //     path: '',
+                  //     value: {}
+                  //   }]
+                  // }
+                ]);
+
                 expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
                 expect(tree._vertices.planets.inner.mercury).to.not.exist;
 
@@ -350,10 +554,27 @@ objective('SolarSystem', function(path) {
             // create expected (post deletion) solar system
             delete SolarSystem.sun.radius;
 
+            var patched = [];
+            tree.on('$patch', function(patch) {
+              patched.push(patch);
+            });
+
             tree.on('$unload', function(source) {
               if (source.filename !== deletefile) return;
               tree._stop();
               try {
+
+                expect(patched).to.eql([
+                  {
+                    doc: 'sun/radius',
+                    patch: [{
+                      op: 'remove',
+                      path: '',
+                      value: 696000000
+                    }]
+                  }
+                ]);
+
                 expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
                 expect(tree._vertices.sun.radius).to.not.exist;
 
