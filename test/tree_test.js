@@ -274,7 +274,7 @@ objective('Tree', function() {
 
   context('_attachFile()', function() {
 
-    beforeEach(function(Tree, SourceType) {
+    beforeEach(function(Tree, SourceType, Agent) {
       mock('tree', new Tree({mount: '/path/to/tree'}));
       mock('sourceFile', {
         type: SourceType.FILE,

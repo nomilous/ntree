@@ -22,11 +22,23 @@ TODO: It supports functions.
 
 TODO: It emits change events.
 
+TODO: Configure patch emit to supply doc path, doc type
+
+TODO: Configure patch emit to use full path in patch ops
+
 TODO: Standardize change op names (json patch?)
 
 TODO: What happens on orphaned branch when still got ref but deleted nearer root (in tree, on disk)
 
 TODO: Delete renames to .YYMMDD.HHMMSS.mmm.deleted
+
+TODO: functions are bound to containing doc as this
+
+TODO: functions use in.
+
+TODO: array support
+
+TODO: lazy loading
 
 ## eg.
 

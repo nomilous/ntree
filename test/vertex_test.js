@@ -70,7 +70,7 @@ objective('Vertex', function() {
       serializer.does(function readSync(vertex) {
         expect(vertex).to.equal(vertex);
       });
-      vertex.loadSource();
+      vertex.loadSource(true);
       done();
     });
 
@@ -94,7 +94,7 @@ objective('Vertex', function() {
             // key9: new Date,
           }
         });
-        vertex.loadSource();
+        vertex.loadSource(true);
 
         expect(tree._vertices.outer.__).to.be.an.instanceof(Vertex);
         expect(tree._vertices.outer.key1.__).to.be.an.instanceof(Vertex);

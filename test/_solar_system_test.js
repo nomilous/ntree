@@ -16,12 +16,16 @@ objective('SolarSystem', function(path) {
     mkdirp(MOUNT, done);
   });
 
-  beforeEach('install solar system', function(done, cpr) {
+  beforeEach('create solar system', function(done, cpr) {
     cpr(SOURCE, MOUNT, done);
   });
 
-  afterEach('remove solar system', function(done, rimraf) {
+  afterEach('destroy solar system', function(done, rimraf) {
     rimraf(MOUNT, done);
+  });
+
+  afterEach('toss makemake', function(done, rimraf) {
+    rimraf(path.normalize(MOUNT + '/../makemake'), done);
   });
 
   beforeEach('create expected system', function() {
@@ -98,19 +102,232 @@ objective('SolarSystem', function(path) {
 
   context('syncIn', function() {
 
-    context('new source files/dirs', function() {
+    context('changed source files/dirs', function() {
       it('');
     });
 
-    context('changed source files/dirs', function() {
-      it('');
+    context('new source files/dirs', function() {
+
+      it('adds to tree (file, no overlap)',
+        // 
+        function(done, expect, ntree, SolarSystem, fxt, fs, path) {
+          ntree.create(MOUNT).then(function(tree) {
+
+            var newsource = path.normalize(MOUNT + '/planets/outer/jupiter/moons.js');
+            var content = fxt(function() {/*
+              module.exports = {
+                europa: {},
+                io: {},
+                ganymede: {},
+                callisto: {}
+              }
+            */});
+
+            tree.on('$patch', function(patch) {
+              try {
+
+                expect(patch).to.eql({
+                  doc: {
+                    path: '/planets/outer/jupiter/moons'
+                  },
+                  patch: [{
+                    op: 'add',
+                    path: '',
+                    value: {
+                      europa: {},
+                      io: {},
+                      ganymede: {},
+                      callisto: {}
+                    }
+                  }]
+                });
+
+                var moons = tree._vertices.planets.outer.jupiter.moons;
+                expect(moons.__.sources.length).to.equal(1);
+                expect(moons.__.sources[0].filePath).to.equal('planets/outer/jupiter/moons.js');
+                expect(moons.io.__.sources.length).to.equal(1);
+                expect(moons.io.__.sources[0].filePath).to.equal('planets/outer/jupiter/moons.js');
+
+              } catch (e) {
+                tree._stop();
+                return done(e);
+              }
+
+              // ensure the agent does not report the new key (would lead to sync _back_ out)
+              var ran = false;
+              mock(tree._vertices.planets.outer.jupiter.__.agent).spy(function onChanged(change) {
+                ran = true;
+              });
+
+              setTimeout(function() {
+                tree._stop();
+                expect(ran).to.be.false;
+                done();
+              }, 50);
+            });
+
+            fs.writeFileSync(newsource, content);
+
+          }).catch(done);
+      });
+
+      it('adds to tree (file, with overlap)',
+        function(done, expect, ntree, SolarSystem, fxt, fs, path) {
+          ntree.create(MOUNT).then(function(tree) {
+            var newsource = path.normalize(MOUNT + '/planets/outer.js');
+            var content = fxt(function() {/*
+              module.exports = {
+                jupiter: {
+                  moons: {
+                    europa: {},
+                    io: {},
+                    ganymede: {},
+                    callisto: {}
+                  }
+                }
+              }
+            */});
+
+            tree.on('$patch', function(patch) {
+              try {
+
+                expect(patch).to.eql({
+                  doc: {
+                    path: '/planets/outer'
+                  },
+                  patch: [{
+                    op: 'add',
+                    path: '/jupiter/moons',
+                    value: {
+                      europa: {},
+                      io: {},
+                      ganymede: {},
+                      callisto: {}
+                    }
+                  }]
+                });
+
+                // expect(tree._vertices.planets.outer.__.sources.length).to.equal(3);
+                // expect(tree._vertices.planets.outer.__.sources[0].filePath).to.equal('planets.js');
+                // expect(tree._vertices.planets.outer.__.sources[1].filePath).to.equal('planets/outer');
+
+                var moons = tree._vertices.planets.outer.jupiter.moons;
+                expect(moons.__.sources.length).to.equal(1);
+                expect(moons.__.sources[0].filePath).to.equal('planets/outer.js');
+                expect(moons.io.__.sources.length).to.equal(1);
+                expect(moons.io.__.sources[0].filePath).to.equal('planets/outer.js');
+
+              } catch (e) {
+                tree._stop();
+                return done(e);
+              }
+
+              // ensure the agent does not report the new key (would lead to sync _back_ out)
+              var ran = false;
+              mock(tree._vertices.planets.outer.jupiter.__.agent).spy(function onChanged(change) {
+                ran = true;
+              });
+
+              setTimeout(function() {
+                tree._stop();
+                expect(ran).to.be.false;
+                done();
+              }, 50);
+            });
+
+            fs.writeFileSync(newsource, content);
+
+          }).catch(done);
+      });
+      
+      it('adds to tree (directory, no overlap)',
+        // add moons dir to jupiter (completely new node)
+        function(done, expect, ntree, SolarSystem, mkdirp, path) {
+          ntree.create(MOUNT).then(function(tree) {
+            
+            var newsource = path.normalize(MOUNT + '/planets/outer/jupiter/moons');
+
+            tree.on('$patch', function(patch) {
+              try {
+                expect(patch).to.eql({
+                  doc: {
+                    path: '/planets/outer/jupiter/moons'
+                  },
+                  patch: [{
+                    op: 'add',
+                    path: '',
+                    value: {}
+                  }]
+                })
+
+                expect(tree._vertices.planets.outer.jupiter.moons.__).to.exist;
+                expect(tree.planets.outer.jupiter.moons).to.eql({});
+              } catch (e) {
+                tree._stop();
+                return done(e);
+              }
+
+              var ran = false;
+              mock(tree._vertices.planets.outer.jupiter.__.agent).spy(function onChanged(change) {
+                ran = true;
+              });
+
+              setTimeout(function() {
+                tree._stop();
+                expect(ran).to.be.false;
+                done();
+              }, 50);
+            });
+
+            mkdirp(newsource);
+          }).catch(done);
+      });
+
+      it('adds to tree (directory, with overlap)',
+        // add earth dir (defining node already defined in planets.js and inner.js)
+        function(done, expect, ntree, SolarSystem, mkdirp, path) {
+          ntree.create({
+            mount: MOUNT,
+            patch: {
+              noop: true // only emits patch if patch.noop is enabled
+            }
+          }).then(function(tree) {
+            
+            var newsource = path.normalize(MOUNT + '/planets/inner/earth');
+
+            tree.on('$patch', function(patch) {
+              tree._stop();
+
+              try {
+                expect(patch).to.eql({
+                  doc: {
+                    path: '/planets/inner/earth'
+                  },
+                  patch: [{
+                    op: 'noop',
+                    path: ''
+                  }]
+                })
+
+                expect(tree._vertices.planets.inner.earth.__.sources.length).to.equal(3);
+                expect(tree._vertices.planets.inner.earth.__.sources[0].filePath).to.equal('planets.js');
+                expect(tree._vertices.planets.inner.earth.__.sources[1].filePath).to.equal('planets/inner.js');
+                expect(tree._vertices.planets.inner.earth.__.sources[2].filePath).to.equal('planets/inner/earth');
+              } catch (e) {
+                return done(e);
+              }
+              done();          
+            });
+
+            mkdirp(newsource);
+          }).catch(done);
+      });
+
     });
 
     context('deleted source files/dirs', function() {
 
       it('remembers which source for removing keys added after start');
-
-      it('emits diff');
 
       it('deletes from tree when source deleted (file, no path overlap, nested)',
         // deletes pluto.js (has no overlap with directory or other js files)
@@ -128,7 +345,9 @@ objective('SolarSystem', function(path) {
               try {
 
                 expect(patch).to.eql({
-                  doc: 'dwarf_planets/pluto',
+                  doc: {
+                    path: '/dwarf_planets/pluto'
+                  },
                   patch: [{
                     op: 'remove',
                     path: '',
@@ -184,7 +403,9 @@ objective('SolarSystem', function(path) {
               try {
 
                 expect(patch).to.eql({
-                  doc: 'planets/inner',
+                  doc: {
+                    path: '/planets/inner'
+                  },
                   patch: [{
                     op: 'remove',
                     path: '/earth/radius',
@@ -245,7 +466,9 @@ objective('SolarSystem', function(path) {
               try {
 
                 expect(patch).to.eql({
-                  doc: 'planets',
+                  doc: {
+                    path: '/planets'
+                  },
                   patch: [
                     {
                       op: 'remove',
@@ -340,7 +563,9 @@ objective('SolarSystem', function(path) {
                 // TODO: single delete of dir results in multiple emits, a way to not?
                 expect(patched).to.eql([
                   {
-                    doc: 'dwarf_planets/makemake/name',
+                    doc: {
+                      path: '/dwarf_planets/makemake/name'
+                    },
                     patch: [{
                       op: 'remove',
                       path: '',
@@ -348,7 +573,9 @@ objective('SolarSystem', function(path) {
                     }]
                   },
                   {
-                    doc: 'dwarf_planets/makemake/radius',
+                    doc: {
+                      path: '/dwarf_planets/makemake/radius'
+                    },
                     patch: [{
                       op: 'remove',
                       path: '',
@@ -356,7 +583,9 @@ objective('SolarSystem', function(path) {
                     }]
                   },
                   {
-                    doc: 'dwarf_planets/makemake',
+                    doc: {
+                      path: '/dwarf_planets/makemake'
+                    },
                     patch: [{
                       op: 'remove',
                       path: '',
@@ -401,7 +630,9 @@ objective('SolarSystem', function(path) {
 
                 expect(patched).to.eql([
                   {
-                    doc: "dwarf_planets/eris",
+                    doc: {
+                      path: "/dwarf_planets/eris"
+                    },
                     patch: [
                       {
                         op: "remove",
@@ -414,7 +645,9 @@ objective('SolarSystem', function(path) {
                     ]
                   },
                   {
-                    doc: "dwarf_planets/pluto",
+                    doc: {
+                      path: "/dwarf_planets/pluto"
+                    },
                     patch: [
                       {
                         op: "remove",
@@ -427,7 +660,9 @@ objective('SolarSystem', function(path) {
                     ]
                   },
                   {
-                    doc: "dwarf_planets/makemake/name",
+                    doc: {
+                      path: "/dwarf_planets/makemake/name"
+                    },
                     patch: [
                       {
                         op: "remove",
@@ -437,7 +672,9 @@ objective('SolarSystem', function(path) {
                     ]
                   },
                   {
-                    doc: "dwarf_planets/makemake/radius",
+                    doc: {
+                      path: "/dwarf_planets/makemake/radius"
+                    },
                     patch: [
                       {
                         op: "remove",
@@ -447,7 +684,9 @@ objective('SolarSystem', function(path) {
                     ]
                   },
                   {
-                    doc: "dwarf_planets/makemake",
+                    doc: {
+                      path: "/dwarf_planets/makemake"
+                    },
                     patch: [
                       {
                         op: "remove",
@@ -457,7 +696,9 @@ objective('SolarSystem', function(path) {
                     ]
                   },
                   {
-                    doc: "dwarf_planets",
+                    doc: {
+                      path: "/dwarf_planets"
+                    },
                     patch: [
                       {
                         op: "remove",
@@ -504,7 +745,9 @@ objective('SolarSystem', function(path) {
 
                 expect(patched).to.eql([
                   {
-                    doc: 'planets/inner/mercury',
+                    doc: {
+                      path: '/planets/inner/mercury'
+                    },
                     patch: [
                       {
                         op: 'remove',
@@ -566,7 +809,9 @@ objective('SolarSystem', function(path) {
 
                 expect(patched).to.eql([
                   {
-                    doc: 'sun/radius',
+                    doc: {
+                      path: '/sun/radius'
+                    },
                     patch: [{
                       op: 'remove',
                       path: '',
