@@ -17,7 +17,18 @@ Each fragment is a node/javascript file with data per whatever it `module.export
 **first console:** start cli (repl) with data directory to mount
 
 ```javascript
+# git clone https://github.com/nomilous/ntree.git
+# cd ntree
+# npm install
 bin/ntree sample/solar_system
+>
+> // view tree
+> $tree
+Tree {
+  dwarf_planets: [Getter/Setter],
+  planets: [Getter/Setter],
+  sun: [Getter/Setter] }
+>
 >
 > // subscribe to $patch events
 > $tree.on('$patch', change => console.log(change));
@@ -54,7 +65,7 @@ TODO: add .json
 
 TODO: It synchronizes changes: file system ---> `tree`
 
-TODO: It synchronizes changes: file system <--- `tree`
+TODO: It synchronizes changes: `tree` ---> file system
 
 TODO: It supports functions.
 

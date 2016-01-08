@@ -104,6 +104,16 @@ objective('SolarSystem', function(path) {
 
   context.only('syncIn', function() {
 
+    beforeEach(function() {
+      mock('config', {
+        mount: MOUNT,
+        onError: function(e) {
+          // console.log(e);  
+        },
+        patch: {}
+      });
+    });
+
     afterEach(function() {
       // when some of the tests fail thay can leave the tree active
       // and then events are fired on the cleanup deletions from _temp 
@@ -118,16 +128,185 @@ objective('SolarSystem', function(path) {
       
       context('updates tree (file, no overlap)', function() {
 
-        it('changes keys and emits patches',
-          function(done, expect, ntree, SolarSystem, fxt, fs, path) {
+        it('emits empty patch if no change (single key)',
+          function(done, config, expect, ntree, SolarSystem, fxt, fs, path) {
             var _this = this;
-            ntree.create(MOUNT).then(function(tree) {
+            ntree.create(config).then(function(tree) {
+              _this.tree = tree;
+              var changesource = path.normalize(MOUNT + '/sun/radius.js');
+              var content = fxt(function() {/*
+                module.exports = 696000000;
+              */});
+
+              tree.on('$patch', function(patch) {
+                try {
+                  expect(patch).to.eql({
+                    doc: {
+                      path: '/sun/radius'
+                    },
+                    patch: []
+                  });
+                } catch (e) {
+                  tree._stop();
+                  return done(e);
+                }
+                tree._stop();
+                done();
+              });
+
+              fs.writeFileSync(changesource, content);
+            }).catch(done);
+        });
+
+        it('changes key and emits patch (single key)',
+          function(done, config, expect, ntree, SolarSystem, fxt, fs, path) {
+            var _this = this;
+            ntree.create(config).then(function(tree) {
+              _this.tree = tree;
+              var changesource = path.normalize(MOUNT + '/sun/radius.js');
+              var content = fxt(function() {/*
+                module.exports = 0;
+              */});
+
+              tree.on('$patch', function(patch) {
+                try {
+                  expect(patch).to.eql({
+                    doc: {
+                      path: '/sun/radius'
+                    },
+                    patch: [{
+                      op: 'replace',
+                      path: '',
+                      value: 0
+                    }]
+                  });
+                } catch (e) {
+                  tree._stop();
+                  return done(e);
+                }
+                tree._stop();
+                done();
+              });
+
+              fs.writeFileSync(changesource, content);
+            }).catch(done);
+        });
+
+        it('emits empty patch if no change (multiple key, no overlap)',
+          function(done, config, expect, ntree, SolarSystem, fxt, fs, path) {
+            var _this = this;
+            ntree.create(config).then(function(tree) {
+              _this.tree = tree;
+              var changesource = path.normalize(MOUNT + '/dwarf_planets/eris.js');
+              var content = fxt(function() {/*
+                module.exports = {
+                  name: 'Eris',
+                  radius: 1163000
+                };
+              */});
+
+              tree.on('$patch', function(patch) {
+                try {
+                  expect(patch).to.eql({
+                    doc: {
+                      path: '/dwarf_planets/eris'
+                    },
+                    patch: []
+                  });
+                } catch (e) {
+                  tree._stop();
+                  return done(e);
+                }
+                tree._stop();
+                done();
+              });
+
+              fs.writeFileSync(changesource, content);
+            }).catch(done);
+        });
+
+        it('emits patch if change (multiple key, no overlap)',
+          function(done, config, expect, ntree, SolarSystem, fxt, fs, path) {
+            config.patch.previous = true;
+            var _this = this;
+            ntree.create(config).then(function(tree) {
               _this.tree = tree;
               var changesource = path.normalize(MOUNT + '/planets/inner/mercury.js');
               var content = fxt(function() {/*
                 module.exports = {
-                  name: 'Mercury',
+                  name: 'Quicksilver',
                   radius: 2440000
+                }
+              */});
+
+              tree.on('$patch', function(patch) {
+                try {
+                  expect(patch).to.eql({
+                    doc: {
+                      path: '/planets/inner/mercury'
+                    },
+                    patch: [{
+                      op: 'replace',
+                      path: '/name',
+                      value: 'Quicksilver',
+                      previous: 'Mercury'
+                    }]
+                  })
+                } catch (e) {
+                  tree._stop();
+                  return done(e);
+                }
+                tree._stop();
+                done();
+              });
+
+              fs.writeFileSync(changesource, content);
+            }).catch(done);
+        });
+
+        it('adds new keys (updates vtree) and emits patch');
+
+        it('removes keys (updates vtree) and emits patch');
+
+      });
+
+      context('updates tree (file, with overlap)', function() {
+
+        it.only('emits empty patch if no change (multiple key, with overlap)',
+          function(done, config, expect, ntree, SolarSystem, fxt, fs, path) {
+            var _this = this;
+            config.patch.previous = true;
+            ntree.create(config).then(function(tree) {
+              _this.tree = tree;
+              var changesource = path.normalize(MOUNT + '/planets.js');
+              var content = fxt(function() {/*
+                module.exports = {
+                  inner: {
+                    venus: {
+                      name: 'Venus',
+                      radius: 6052000
+                    },
+                    earth: {
+                      name: 'Earth'
+                    },
+                    mars: {
+                      name: 'Mars',
+                      radius: 3390000
+                    }
+                  },
+                  outer: {
+                    saturn: {
+                      name: 'Saturn'
+                    },
+                    uranus: {
+                      name: 'Uranus',
+                      radius: 25362000
+                    },
+                    neptune: {
+                      name: 'Neptune',
+                      radius: 24622000
+                    }
+                  }
                 }
               */});
 
@@ -144,30 +323,72 @@ objective('SolarSystem', function(path) {
 
               fs.writeFileSync(changesource, content);
             }).catch(done);
-
         });
 
-        it('adds new keys (updates vtree) and emits patches');
+        it.only('emits empty patch if no change (multiple key, with overlap)',
+          function(done, config, expect, ntree, SolarSystem, fxt, fs, path) {
+            var _this = this;
+            config.patch.previous = true;
+            ntree.create(config).then(function(tree) {
+              _this.tree = tree;
+              var changesource = path.normalize(MOUNT + '/planets.js');
+              var content = fxt(function() {/*
+                module.exports = {
+                  inner: {
+                    venus: {
+                      name: 'Venus',
+                      radius: 6052000
+                    },
+                    earth: {
+                      name: 'Earth'
+                    },
+                    mars: {
+                      name: 'Mars',
+                      radius: 3390000
+                    }
+                  },
+                  outer: {
+                    saturn: {
+                      name: 'Saturn'
+                    },
+                    uranus: {
+                      name: 'Uranus',
+                      radius: 25362000
+                    },
+                    neptune: {
+                      name: 'Neptune',
+                      radius: 24622000
+                    }
+                  }
+                }
+              */});
 
-        it('removes keys (updates vtree) and emits patches');
+              tree.on('$patch', function(patch) {
+                try {
+                  console.log(patch);
+                } catch (e) {
+                  tree._stop();
+                  return done(e);
+                }
+                tree._stop();
+                done();
+              });
 
-      });
+              fs.writeFileSync(changesource, content);
+            }).catch(done);
+        });
 
-      context('updates tree (file, with overlap)', function() {
+        it('add new keys (updates vtree) and emits patch (onMultiple last)');
 
-        it('changes keys and emits patches');
+        it('add new keys (updates vtree) and emits patch (onMultiple first)');
 
-        it('add new keys (updates vtree) and emits patches (onMultiple last)');
+        it('add new keys (updates vtree) and emits patch (onMultiple fn)');
 
-        it('add new keys (updates vtree) and emits patches (onMultiple first)');
+        it('removes keys (updates vtree) and emits patch (onMultiple last');
 
-        it('add new keys (updates vtree) and emits patches (onMultiple fn)');
+        it('removes keys (updates vtree) and emits patch (onMultiple first');
 
-        it('removes keys (updates vtree) and emits patches (onMultiple last');
-
-        it('removes keys (updates vtree) and emits patches (onMultiple first');
-
-        it('removes keys (updates vtree) and emits patches (onMultiple fn');
+        it('removes keys (updates vtree) and emits patch (onMultiple fn');
 
       });
 
@@ -176,9 +397,9 @@ objective('SolarSystem', function(path) {
     context('new source files/dirs', function() {
 
       it('adds to tree (file, no overlap)',
-        function(done, expect, ntree, SolarSystem, fxt, fs, path) {
+        function(done, config, expect, ntree, SolarSystem, fxt, fs, path) {
           var _this = this;
-          ntree.create(MOUNT).then(function(tree) {
+          ntree.create(config).then(function(tree) {
             _this.tree = tree;
 
             var newsource = path.normalize(MOUNT + '/planets/outer/jupiter/moons.js');
@@ -246,9 +467,9 @@ objective('SolarSystem', function(path) {
       });
 
       it('adds to tree (file, with overlap)',
-        function(done, expect, ntree, SolarSystem, fxt, fs, path) {
+        function(done, config, expect, ntree, SolarSystem, fxt, fs, path) {
           var _this = this;
-          ntree.create(MOUNT).then(function(tree) {
+          ntree.create(config).then(function(tree) {
             _this.tree = tree;
             var newsource = path.normalize(MOUNT + '/planets/outer.js');
             var content = fxt(function() {/*
@@ -321,9 +542,9 @@ objective('SolarSystem', function(path) {
       
       it('adds to tree (directory, no overlap)',
         // add moons dir to jupiter (completely new node)
-        function(done, expect, ntree, SolarSystem, mkdirp, path) {
+        function(done, config, expect, ntree, SolarSystem, mkdirp, path) {
           var _this = this;
-          ntree.create(MOUNT).then(function(tree) {
+          ntree.create(config).then(function(tree) {
             _this.tree = tree;
             
             var newsource = path.normalize(MOUNT + '/planets/outer/jupiter/moons');
@@ -370,14 +591,10 @@ objective('SolarSystem', function(path) {
 
       it('adds to tree (directory, with overlap)',
         // add earth dir (defining node already defined in planets.js and inner.js)
-        function(done, expect, ntree, SolarSystem, mkdirp, path) {
+        function(done, config, expect, ntree, SolarSystem, mkdirp, path) {
           var _this = this;
-          ntree.create({
-            mount: MOUNT,
-            patch: {
-              noop: true // only emits patch if patch.noop is enabled
-            }
-          }).then(function(tree) {
+          config.patch.noop = true // only emits patch if patch.noop is enabled
+          ntree.create(config).then(function(tree) {
             _this.tree = tree;
             
             var newsource = path.normalize(MOUNT + '/planets/inner/earth');
@@ -421,9 +638,9 @@ objective('SolarSystem', function(path) {
 
       it('deletes from tree when source deleted (file, no path overlap, nested)',
         // deletes pluto.js (has no overlap with directory or other js files)
-        function(done, expect, ntree, SolarSystem, fs, path) {
+        function(done, config, expect, ntree, SolarSystem, fs, path) {
           var _this = this;
-          ntree.create(MOUNT).then(function(tree) {
+          ntree.create(config).then(function(tree) {
             _this.tree = tree;
 
             var deletefile = path.normalize(MOUNT + '/dwarf_planets/pluto.js');
@@ -475,9 +692,9 @@ objective('SolarSystem', function(path) {
 
       it('deletes from tree when source deleted (file, has path overlap, nested)',
         // deletes inner.js which overlaps paths all the way to inner/earth/radius
-        function(done, expect, ntree, SolarSystem, fs, path) {
+        function(done, config, expect, ntree, SolarSystem, fs, path) {
           var _this = this;
-          ntree.create(MOUNT).then(function(tree) {
+          ntree.create(config).then(function(tree) {
             _this.tree = tree;
 
             var deletefile = path.normalize(MOUNT + '/planets/inner.js');
@@ -538,11 +755,11 @@ objective('SolarSystem', function(path) {
           }).catch(done);
       });
 
-      it('deletes from tree when source deleted (file, has path overlap, root)',
+      it.only('deletes from tree when source deleted (file, has path overlap, root)',
         // deletes planets.js which overlaps extensively and is a key on the root
-        function(done, expect, ntree, SolarSystem, fs, path) {
+        function(done, config, expect, ntree, SolarSystem, fs, path) {
           var _this = this;
-          ntree.create(MOUNT).then(function(tree) {
+          ntree.create(config).then(function(tree) {
             _this.tree = tree;
 
             expect(tree._vertices.planets.__.sources.length).to.equal(2);
@@ -562,7 +779,8 @@ objective('SolarSystem', function(path) {
             delete SolarSystem.planets.inner.mars;
             delete SolarSystem.planets.outer.saturn.name;
             delete SolarSystem.planets.outer.uranus;
-            delete SolarSystem.planets.outer.neptune.radius; // TODO: name also defined in neptune/name.js (collides???)
+            delete SolarSystem.planets.outer.neptune.name; // neptune = {} remains (defined directory)
+            delete SolarSystem.planets.outer.neptune.radius;
 
             tree.on('$patch', function(patch) {
               if (patch.doc.path !== '/planets') {
@@ -612,7 +830,11 @@ objective('SolarSystem', function(path) {
                     },
                     {
                       op: 'remove',
-                      // name still defined in neptune/name.js
+                      path: '/outer/neptune/name',
+                      value: 'Neptune'
+                    },
+                    {
+                      op: 'remove',
                       path: '/outer/neptune/radius',
                       value: 24622000
                     }
@@ -648,9 +870,9 @@ objective('SolarSystem', function(path) {
 
       it('deletes from tree when source deleted (directory, no overlap, nested)',
         // deletes dwarf_planets/makemake which has no overlaps defined in ancestor
-        function(done, expect, ntree, SolarSystem, rimraf, path) {
+        function(done, config, expect, ntree, SolarSystem, rimraf, path) {
           var _this = this;
-          ntree.create(MOUNT).then(function(tree) {
+          ntree.create(config).then(function(tree) {
             _this.tree = tree;
 
             var deletefile = path.normalize(MOUNT + '/dwarf_planets/makemake');
@@ -722,9 +944,9 @@ objective('SolarSystem', function(path) {
 
       it('deletes from tree when source deleted (directory, no overlap, root)',
         // deletes dwarf_planets which has no overlaps defined in ancestor and is a key on root
-        function(done, expect, ntree, SolarSystem, rimraf, path) {
+        function(done, config, expect, ntree, SolarSystem, rimraf, path) {
           var _this = this;
-          ntree.create(MOUNT).then(function(tree) {
+          ntree.create(config).then(function(tree) {
             _this.tree = tree;
 
             var deletefile = path.normalize(MOUNT + '/dwarf_planets');
@@ -843,9 +1065,9 @@ objective('SolarSystem', function(path) {
 
       it('deletes from tree when source deleted (directory, has path overlap, nested)',
         // deletes planets/inner which has much overlap defined in ancestor
-        function(done, expect, ntree, SolarSystem, rimraf, path) {
+        function(done, config, expect, ntree, SolarSystem, rimraf, path) {
           var _this = this;
-          ntree.create(MOUNT).then(function(tree) {
+          ntree.create(config).then(function(tree) {
             _this.tree = tree;
 
             var deletefile = path.normalize(MOUNT + '/planets/inner');
@@ -913,9 +1135,9 @@ objective('SolarSystem', function(path) {
 
       it('deletes from tree when source deleted (directory, no path overlap, root)',
         // deletes sun which has overlaps defined in ancestor and is a key on root
-        function(done, expect, ntree, SolarSystem, rimraf, path) {
+        function(done, config, expect, ntree, SolarSystem, rimraf, path) {
           var _this = this;
-          ntree.create(MOUNT).then(function(tree) {
+          ntree.create(config).then(function(tree) {
             _this.tree = tree;
 
             var deletefile = path.normalize(MOUNT + '/sun');

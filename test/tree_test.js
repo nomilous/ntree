@@ -327,7 +327,7 @@ objective('Tree', function() {
           sourceFile.filePath = 'branch';
           sourceFile.treePath = 'branch';
           sourceFile.loading = true;
-          mock(Vertex.prototype).does(function loadSource(loading) {
+          mock(Vertex.prototype).does(function loadSource(source, loading) {
             expect(loading).to.be.true;
           })
           tree._attachFile(sourceFile);

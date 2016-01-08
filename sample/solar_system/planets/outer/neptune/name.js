@@ -1,1 +1,1 @@
-module.exports = 'Neptune';
+module.exports = 'Neptune'; // duplicate already defined in planets.js

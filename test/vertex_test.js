@@ -66,16 +66,16 @@ objective('Vertex', function() {
       };
     });
 
-    it('calls readSync on the serializer for source', function(done, vertex, serializer, expect) {
+    it('calls readSync on the serializer for source', function(done, vertex, source, serializer, expect) {
       serializer.does(function readSync(vertex) {
         expect(vertex).to.equal(vertex);
       });
-      vertex.loadSource(true);
+      vertex.loadSource(source, true);
       done();
     });
 
     it('builds the vertex and user subtrees from the source',
-      function(done, vertex, tree, serializer, expect, Vertex) {
+      function(done, vertex, source, tree, serializer, expect, Vertex) {
         serializer.does(function readSync(vertex) {
           return {
             key1: 1,
@@ -94,7 +94,7 @@ objective('Vertex', function() {
             // key9: new Date,
           }
         });
-        vertex.loadSource(true);
+        vertex.loadSource(source, true);
 
         expect(tree._vertices.outer.__).to.be.an.instanceof(Vertex);
         expect(tree._vertices.outer.key1.__).to.be.an.instanceof(Vertex);
