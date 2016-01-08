@@ -1,4 +1,5 @@
 var Tree = require('./lib/tree');
+var Errors = require('./lib/errors');
 var Promise = require('bluebird');
 
 module.exports.create = function(opts) {
@@ -23,3 +24,4 @@ module.exports.create = function(opts) {
 };
 
 module.exports.Tree = Tree;
+module.exports.Errors = Errors;
