@@ -6,24 +6,19 @@
 
 A file system based "living tree" of functional data.
 
-## a what?
+***
 
-It assembles a `tree` of data from fragments recursed out of the `config.mount` directory.
-
-Each fragment is a node/javascript file with data per whatever it `module.exports`.
+It assembles a `tree` of data from file sources recursed out of the `config.mount` directory. Each source is a node/javascript file with data per whatever it `module.exports`.
 
 ### Play with cli and sample data
 
 **first console:** start cli (repl) with data directory to mount
 
 ```javascript
-# git clone https://github.com/nomilous/ntree.git
-# cd ntree
-# npm install
 bin/ntree sample/solar_system
 >
 > // view tree
-> $tree
+> $tree  
 Tree {
   dwarf_planets: [Getter/Setter],
   planets: [Getter/Setter],
@@ -31,7 +26,7 @@ Tree {
 >
 >
 > // subscribe to $patch events
-> $tree.on('$patch', change => console.log(change));
+> $tree.on('$patch', change => console.log(JSON.stringify(change, null, 2)));
 >
 ```
 
@@ -45,21 +40,20 @@ mkdir sample/solar_system/planets/outer/jupiter/moons
 
 ```javascript
 >
-> { 
-  doc: { 
-    path: '/planets/outer/jupiter/moons' 
+> {
+  "doc": {
+    "path": "/planets/outer/jupiter/moons"
   },
-  /* application/json-patch+json */
-  patch: [
-    { 
-      op: 'add',
-      path: '',
-      value: {} 
-    } 
-  ] 
+  "patch": [
+    {
+      "op": "add",
+      "path": "",
+      "value": {}
+    }
+  ]
 }
 ```
-
+***
 
 TODO: add .json
 
