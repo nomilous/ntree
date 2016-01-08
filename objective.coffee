@@ -7,7 +7,7 @@ objective
     once: false
     plugins: 
         'objective_dev':
-            reporter: 'Dot'
+            # reporter: 'Dot'
             sourceDir: 'lib'
             testDir: 'test'
             testAppend: '_test'
