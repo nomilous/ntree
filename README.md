@@ -2,9 +2,15 @@
 
 # ntree
 
+`npm install ntree --save`
+
 A file system based "living tree" of functional data.
 
-`npm install ntree --save`
+## a what?
+
+It assembles a `tree` of data from fragments recursed out of the `config.mount` directory.
+
+Each fragment is a node/javascript file with data per whatever it `module.exports`.
 
 ### Play with cli and sample data
 
@@ -43,11 +49,6 @@ mkdir sample/solar_system/planets/outer/jupiter/moons
 }
 ```
 
-## ?
-
-It assembles a `tree` of data from fragments recursed out of the `config.mount` directory.
-
-Each fragment is a node/javascript file with data per whatever it `module.exports`.
 
 TODO: add .json
 
