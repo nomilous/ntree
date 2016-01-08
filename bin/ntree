@@ -22,6 +22,7 @@ cmd.option('--scan-interval [ms]', 'milliseconds between key scans');
 cmd.option('--no-sync-in',         'disable sync from disk to tree');
 cmd.option('--no-sync-out',        'disable sync from tree to disk');
 cmd.option('--no-sync',            'neither in or out');
+cmd.option('--no-patch-noops',     'disable noop patch operations');
 
 cmd.parse(process.argv);
 
@@ -66,6 +67,9 @@ ntree.create({
     followSymlinks: followSymlinks,
     // more options for watcher: https://github.com/paulmillr/chokidar
   },
+  patch: {
+    noop: cmd.patchNoops
+  }
   
   // lazy: cmd.lazy,
 })

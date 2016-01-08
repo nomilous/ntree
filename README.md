@@ -6,6 +6,43 @@ A file system based "living tree" of functional data.
 
 `npm install ntree --save`
 
+### Play with cli and sample data
+
+**first console:** start cli (repl) with data directory to mount
+
+```javascript
+bin/ntree sample/solar_system
+>
+> // subscribe to $patch events
+> $tree.on('$patch', change => console.log(change));
+>
+```
+
+**second console:** create a new directory on disk
+
+```bash
+mkdir sample/solar_system/planets/outer/jupiter/moons
+```
+
+**back in first console** see `$patch` event as disk change syncs into the tree
+
+```javascript
+>
+> { 
+  doc: { 
+    path: '/planets/outer/jupiter/moons' 
+  },
+  /* application/json-patch+json */
+  patch: [
+    { 
+      op: 'add',
+      path: '',
+      value: {} 
+    } 
+  ] 
+}
+```
+
 ## ?
 
 It assembles a `tree` of data from fragments recursed out of the `config.mount` directory.
@@ -39,6 +76,8 @@ TODO: functions use in.
 TODO: array support
 
 TODO: lazy loading
+
+TODO: should all directory event emit noop patch operation
 
 ## eg.
 
