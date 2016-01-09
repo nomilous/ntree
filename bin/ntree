@@ -73,8 +73,12 @@ ntree.create({
     previous: typeof cmd.patchPrevious !== 'undefined',
   },
   // onError: function(e) {
+  //   if (e instanceof ntree.Errors.MultipleSourceError) {
+  //     console.log(e.toString(), 'from', e.info.sources.map(function(s) {
+  //       return s.filePath;
+  //     }).join(' and '));
+  //   }
   // }
-  
   // lazy: cmd.lazy,
 })
 

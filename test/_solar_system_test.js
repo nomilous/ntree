@@ -91,10 +91,20 @@ objective('SolarSystem', function(path) {
     });
   });
 
+  beforeEach(function() {
+    mock('config', {
+      mount: MOUNT,
+      onError: function(e) {
+        // console.log(e);  
+      },
+      patch: {}
+    });
+  });
+
 
   it('loads the solar system ok',
-    function(done, expect, ntree, SolarSystem) {
-      ntree.create(MOUNT).then(function(tree) {
+    function(done, config, expect, ntree, SolarSystem) {
+      ntree.create(config).then(function(tree) {
         expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
         tree._stop();
         done();
@@ -102,17 +112,7 @@ objective('SolarSystem', function(path) {
   });
 
 
-  context.only('syncIn', function() {
-
-    beforeEach(function() {
-      mock('config', {
-        mount: MOUNT,
-        onError: function(e) {
-          // console.log(e);  
-        },
-        patch: {}
-      });
-    });
+  context('syncIn', function() {
 
     afterEach(function() {
       // when some of the tests fail thay can leave the tree active
@@ -140,6 +140,7 @@ objective('SolarSystem', function(path) {
 
               tree.on('$patch', function(patch) {
                 try {
+                  expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
                   expect(patch).to.eql({
                     doc: {
                       path: '/sun/radius'
@@ -167,9 +168,11 @@ objective('SolarSystem', function(path) {
               var content = fxt(function() {/*
                 module.exports = 0;
               */});
+              SolarSystem.sun.radius = 0;
 
               tree.on('$patch', function(patch) {
                 try {
+                  expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
                   expect(patch).to.eql({
                     doc: {
                       path: '/sun/radius'
@@ -207,6 +210,7 @@ objective('SolarSystem', function(path) {
 
               tree.on('$patch', function(patch) {
                 try {
+                  expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
                   expect(patch).to.eql({
                     doc: {
                       path: '/dwarf_planets/eris'
@@ -231,6 +235,7 @@ objective('SolarSystem', function(path) {
             var _this = this;
             ntree.create(config).then(function(tree) {
               _this.tree = tree;
+
               var changesource = path.normalize(MOUNT + '/planets/inner/mercury.js');
               var content = fxt(function() {/*
                 module.exports = {
@@ -239,8 +244,11 @@ objective('SolarSystem', function(path) {
                 }
               */});
 
+              SolarSystem.planets.inner.mercury.name = 'Quicksilver';
+
               tree.on('$patch', function(patch) {
                 try {
+                  expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
                   expect(patch).to.eql({
                     doc: {
                       path: '/planets/inner/mercury'
@@ -272,12 +280,13 @@ objective('SolarSystem', function(path) {
 
       context('updates tree (file, with overlap)', function() {
 
-        it.only('emits empty patch if no change (multiple key, with overlap)',
+        it('emits empty patch if no change (multiple key, with overlap)',
           function(done, config, expect, ntree, SolarSystem, fxt, fs, path) {
             var _this = this;
             config.patch.previous = true;
             ntree.create(config).then(function(tree) {
               _this.tree = tree;
+
               var changesource = path.normalize(MOUNT + '/planets.js');
               var content = fxt(function() {/*
                 module.exports = {
@@ -312,7 +321,13 @@ objective('SolarSystem', function(path) {
 
               tree.on('$patch', function(patch) {
                 try {
-                  console.log(patch);
+                  expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
+                  expect(patch).to.eql({
+                    doc: {
+                      path: '/planets'
+                    },
+                    patch: []
+                  });
                 } catch (e) {
                   tree._stop();
                   return done(e);
@@ -325,10 +340,10 @@ objective('SolarSystem', function(path) {
             }).catch(done);
         });
 
-        it.only('emits empty patch if no change (multiple key, with overlap)',
+        it('emits patch with change (multiple key, with overlap)',
           function(done, config, expect, ntree, SolarSystem, fxt, fs, path) {
             var _this = this;
-            config.patch.previous = true;
+            // config.patch.previous = true;
             ntree.create(config).then(function(tree) {
               _this.tree = tree;
               var changesource = path.normalize(MOUNT + '/planets.js');
@@ -336,42 +351,167 @@ objective('SolarSystem', function(path) {
                 module.exports = {
                   inner: {
                     venus: {
-                      name: 'Venus',
+                      name: 'Aphrodite',
                       radius: 6052000
                     },
                     earth: {
                       name: 'Earth'
                     },
                     mars: {
-                      name: 'Mars',
+                      name: 'Ares',
                       radius: 3390000
                     }
                   },
                   outer: {
                     saturn: {
-                      name: 'Saturn'
+                      name: 'Kronos'
                     },
                     uranus: {
                       name: 'Uranus',
                       radius: 25362000
                     },
                     neptune: {
-                      name: 'Neptune',
+                      name: 'Poseidon',
                       radius: 24622000
                     }
                   }
                 }
               */});
 
+              SolarSystem.planets.inner.venus.name = 'Aphrodite';
+              SolarSystem.planets.inner.mars.name = 'Ares';
+              SolarSystem.planets.outer.saturn.name = 'Kronos';
+              SolarSystem.planets.outer.neptune.name = 'Poseidon';
+
               tree.on('$patch', function(patch) {
                 try {
-                  console.log(patch);
+                  expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
+                  expect(patch).to.eql({
+                    doc: {
+                      path: '/planets'
+                    },
+                    patch: [{
+                      op: 'replace',
+                      path: '/inner/venus/name',
+                      value: 'Aphrodite' 
+                    }, {
+                      op: 'replace',
+                      path: '/inner/mars/name',
+                      value: 'Ares'
+                    }, {
+                      op: 'replace',
+                      path: '/outer/saturn/name',
+                      value: 'Kronos'
+                    }, {
+                      op: 'replace',
+                      path: '/outer/neptune/name',
+                      value: 'Poseidon'
+                    }]
+                  });
                 } catch (e) {
                   tree._stop();
                   return done(e);
                 }
                 tree._stop();
                 done();
+              });
+
+              fs.writeFileSync(changesource, content);
+            }).catch(done);
+        });
+
+        it('emits patch with change and errors (multiple key, with overlap)',
+          function(done, config, expect, ntree, SolarSystem, fxt, fs, path) {
+            var _this = this;
+            ntree.create(config).then(function(tree) {
+              _this.tree = tree;
+
+              var changesource = path.normalize(MOUNT + '/planets.js');
+              var content = fxt(function() {/*
+                module.exports = {
+                  inner: {
+                    venus: {
+                      name: 'Aphrodite',
+                      radius: 6052000
+                    },
+                    earth: {
+                      name: 'Earth'
+                    },
+                    mars: {
+                      name: 'Ares',
+                      radius: 3390000
+                    }
+                  },
+                  outer: {
+                    jupiter: {
+                      name: 'Zeus' // cannot change, originally defined in planets/outer/jupiter/name.js
+                    },
+                    saturn: {
+                      name: 'Kronos'
+                    },
+                    uranus: {
+                      name: 'Uranus',
+                      radius: 25362000
+                    },
+                    neptune: {
+                      name: 'Poseidon',
+                      radius: 24622000
+                    }
+                  }
+                }
+              */});
+
+              SolarSystem.planets.inner.venus.name = 'Aphrodite';
+              SolarSystem.planets.inner.mars.name = 'Ares';
+              SolarSystem.planets.outer.saturn.name = 'Kronos';
+              SolarSystem.planets.outer.neptune.name = 'Poseidon';
+
+              var error;
+              tree.on('$error', function(e) {
+                error = e;
+              });
+
+              tree.on('$patch', function(patch) {
+                try {
+                  expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
+                  expect(patch).to.eql({
+                    doc: {
+                      path: '/planets'
+                    },
+                    patch: [{
+                      op: 'replace',
+                      path: '/inner/venus/name',
+                      value: 'Aphrodite' 
+                    }, {
+                      op: 'replace',
+                      path: '/inner/mars/name',
+                      value: 'Ares'
+                    }, {
+                      op: 'replace',
+                      path: '/outer/saturn/name',
+                      value: 'Kronos'
+                    }, {
+                      op: 'replace',
+                      path: '/outer/neptune/name',
+                      value: 'Poseidon'
+                    }]
+                  });
+                } catch (e) {
+                  tree._stop();
+                  return done(e);
+                }
+
+                setTimeout(function() {
+                  tree._stop();
+                  expect(error.toString()).to.equal('MultipleSourceError: planets');
+                  expect(error.info.sources.map(function(s) {
+                    return s.filePath;
+                  })).to.eql([
+                    'planets.js',
+                    'planets/outer/jupiter/name.js'
+                  ]);
+                  done();
+                }, 50);
               });
 
               fs.writeFileSync(changesource, content);
@@ -383,6 +523,8 @@ objective('SolarSystem', function(path) {
         it('add new keys (updates vtree) and emits patch (onMultiple first)');
 
         it('add new keys (updates vtree) and emits patch (onMultiple fn)');
+
+        it('errors on added key already defined from another source');
 
         it('removes keys (updates vtree) and emits patch (onMultiple last');
 
@@ -412,6 +554,13 @@ objective('SolarSystem', function(path) {
               }
             */});
 
+            SolarSystem.planets.outer.jupiter.moons = {
+              europa: {},
+              io: {},
+              ganymede: {},
+              callisto: {}
+            }
+
             tree.on('$patch', function(patch) {
 
               if (patch.doc.path !== '/planets/outer/jupiter/moons') {
@@ -420,7 +569,7 @@ objective('SolarSystem', function(path) {
               }
 
               try {
-
+                expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
                 expect(patch).to.eql({
                   doc: {
                     path: '/planets/outer/jupiter/moons'
@@ -485,12 +634,20 @@ objective('SolarSystem', function(path) {
               }
             */});
 
+            SolarSystem.planets.outer.jupiter.moons = {
+              europa: {},
+              io: {},
+              ganymede: {},
+              callisto: {}
+            }
+
             tree.on('$patch', function(patch) {
               if (patch.doc.path !== '/planets/outer') {
                 console.log('unexpected patch', patch);
                 return;
               }
               try {
+                expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
                 expect(patch).to.eql({
                   doc: {
                     path: '/planets/outer'
@@ -549,12 +706,15 @@ objective('SolarSystem', function(path) {
             
             var newsource = path.normalize(MOUNT + '/planets/outer/jupiter/moons');
 
+            SolarSystem.planets.outer.jupiter.moons = {};
+
             tree.on('$patch', function(patch) {
               if (patch.doc.path !== '/planets/outer/jupiter/moons') {
                 console.log('unexpected patch', patch);
                 return;
               }
               try {
+                expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
                 expect(patch).to.eql({
                   doc: {
                     path: '/planets/outer/jupiter/moons'
@@ -606,6 +766,7 @@ objective('SolarSystem', function(path) {
               }
               tree._stop();
               try {
+                expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
                 expect(patch).to.eql({
                   doc: {
                     path: '/planets/inner/earth'
@@ -755,7 +916,7 @@ objective('SolarSystem', function(path) {
           }).catch(done);
       });
 
-      it.only('deletes from tree when source deleted (file, has path overlap, root)',
+      it('deletes from tree when source deleted (file, has path overlap, root)',
         // deletes planets.js which overlaps extensively and is a key on the root
         function(done, config, expect, ntree, SolarSystem, fs, path) {
           var _this = this;
