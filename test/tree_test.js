@@ -417,7 +417,10 @@ objective('Tree', function() {
           }
         },
         _opts: {
-          sourceMask: new RegExp("^" + '/root/')
+          sourceMask: new RegExp("^" + '/root/'),
+          doc: {
+            path: true
+          }
         },
         _emitter: mock('emitter')
       })

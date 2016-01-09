@@ -22,8 +22,11 @@ cmd.option('--scan-interval [ms]', 'milliseconds between key scans');
 cmd.option('--no-sync-in',         'disable sync from disk to tree');
 cmd.option('--no-sync-out',        'disable sync from tree to disk');
 cmd.option('--no-sync',            'neither in or out');
-cmd.option('--patch-noops',        'disable noop patch operations');
+cmd.option('');
+cmd.option('--patch-noop',         'include noop patch operations');
 cmd.option('--patch-previous',     'include previous in patch replace ops');
+cmd.option('');
+cmd.option('--doc-file',           'include doc filepath');
 
 cmd.parse(process.argv);
 
@@ -69,10 +72,11 @@ ntree.create({
     // more options for watcher: https://github.com/paulmillr/chokidar
   },
   doc: {
-    
-  }
+    path: true,
+    file: typeof cmd.docFile !== 'undefined',
+  },
   patch: {
-    noop: typeof cmd.patchNoops !== 'undefined',
+    noop: typeof cmd.patchNoop !== 'undefined',
     previous: typeof cmd.patchPrevious !== 'undefined',
   },
   // onError: function(e) {
