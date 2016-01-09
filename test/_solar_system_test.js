@@ -272,7 +272,100 @@ objective('SolarSystem', function(path) {
             }).catch(done);
         });
 
-        it('adds new keys (updates vtree) and emits patch');
+        it('adds new keys (updates vtree) and emits patch (no overlap)',
+          function(done, config, expect, ntree, SolarSystem, fxt, fs, path) {
+            config.patch.previous = true;
+            var _this = this;
+            ntree.create(config).then(function(tree) {
+              _this.tree = tree;
+
+              var changesource = path.normalize(MOUNT + '/planets/inner/mercury.js');
+              var content = fxt(function() {/*
+                module.exports = {
+                  name: 'Mercury',
+                  radius: {
+                    value: 2440000,
+                    unit: 'meters'
+                  },
+                  mass: {
+                    value: 0.055,
+                    unit: 'earths'
+                  },
+                  gravity: '0.38g'
+                }
+              */});
+
+              SolarSystem.planets.inner.mercury = {
+                name: 'Mercury',
+                radius: {
+                  value: 2440000,
+                  unit: 'meters'
+                },
+                mass: {
+                  value: 0.055,
+                  unit: 'earths'
+                },
+                gravity: '0.38g'
+              }
+
+              tree.on('$patch', function(patch) {
+                try {
+                  expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
+                  expect(patch).to.eql({
+                    doc: {
+                      path: '/planets/inner/mercury'
+                    },
+                    patch: [{
+                      op: 'replace',
+                      path: '/radius',
+                      value: {
+                        value: 2440000,
+                        unit: 'meters'
+                      },
+                      previous: 2440000
+                    }, {
+                      op: 'add',
+                      path: '/mass',
+                      value: {
+                        value: 0.055,
+                        unit: 'earths'
+                      }
+                    }, {
+                      op: 'add',
+                      path: '/gravity',
+                      value: '0.38g'
+                    }]
+                  });
+
+                  var vmercury = tree._vertices.planets.inner.mercury;
+                  expect(vmercury.__.sources.length).to.equal(1);
+                  expect(vmercury.name.__.sources.length).to.equal(1);
+                  expect(vmercury.radius.value.__.sources.length).to.equal(1);
+                  expect(vmercury.radius.unit.__.sources.length).to.equal(1);
+                  expect(vmercury.mass.value.__.sources.length).to.equal(1);
+                  expect(vmercury.mass.unit.__.sources.length).to.equal(1);
+                  expect(vmercury.gravity.__.sources.length).to.equal(1);
+
+                  var msource = vmercury.__.sources[0];
+                  // expect(vmercury.__.sources[0]).to.equal(msource);
+                  expect(vmercury.name.__.sources[0]).to.equal(msource);
+                  expect(vmercury.radius.value.__.sources[0]).to.equal(msource);
+                  expect(vmercury.radius.unit.__.sources[0]).to.equal(msource);
+                  expect(vmercury.mass.value.__.sources[0]).to.equal(msource);
+                  expect(vmercury.mass.unit.__.sources[0]).to.equal(msource);
+                  expect(vmercury.gravity.__.sources[0]).to.equal(msource);     
+
+                } catch (e) {
+                  tree._stop();
+                  return done(e);
+                }
+                tree._stop();
+                done();
+              });
+
+              fs.writeFileSync(changesource, content);
+            }).catch(done);
+        });
 
         it('removes keys (updates vtree) and emits patch');
 

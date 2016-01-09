@@ -54,7 +54,8 @@ objective('Vertex', function() {
       });
       var source = mock('source', {
         type: SourceType.FILE,
-        serializer: serializer
+        serializer: serializer,
+        route: []
       });
       var vref = mock('vref', {});
       var vertex = new Vertex(tree, 'KEY', source, vref);
