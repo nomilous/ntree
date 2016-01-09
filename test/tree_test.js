@@ -26,7 +26,7 @@ objective('Tree', function() {
       expect(tree._opts.syncIn).to.equal(true);
       expect(tree._opts.syncOut).to.equal(true);
       expect(tree._opts.watcher.followSymlinks).to.equal(false);
-      expect(tree._opts.agents.scanInterval).to.equal(20);
+      expect(tree._opts.agent.scanInterval).to.equal(20);
     });
 
     it('creates sourceMask regex for stripping absolute paths to treePath', function(Tree, expect) {
@@ -493,7 +493,7 @@ objective('Tree', function() {
       var tree = {
         mount: 'dir',
         _opts: {
-          agents: {
+          agent: {
             scanInterval: 20
           }
         },

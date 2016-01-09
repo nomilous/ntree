@@ -61,13 +61,16 @@ ntree.create({
   mount: mountPoint,
   syncIn: cmd.syncIn && cmd.sync,
   syncOut: cmd.syncOut && cmd.sync,
-  agents: {
+  agent: {
     scanInterval: scanInterval
   },
   watcher: {
     followSymlinks: followSymlinks,
     // more options for watcher: https://github.com/paulmillr/chokidar
   },
+  doc: {
+    
+  }
   patch: {
     noop: typeof cmd.patchNoops !== 'undefined',
     previous: typeof cmd.patchPrevious !== 'undefined',

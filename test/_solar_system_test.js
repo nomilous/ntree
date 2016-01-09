@@ -477,7 +477,111 @@ objective('SolarSystem', function(path) {
                       path: '/inner/earth/name',
                       previous: 'Earth'
                     }]
-                  })
+                  });
+
+                  expect(tree._vertices.planets.inner.venus).to.not.exist;
+                  expect(tree._vertices.planets.inner.mars).to.not.exist;
+                  expect(tree._vertices.planets.inner.earth.name).to.not.exist;
+
+                  console.log('sources?');
+
+                  // console.log(tree._vertices.planets.__.sources);
+                  // console.log(tree._vertices.planets.inner.__.sources);
+                  // console.log(tree._vertices.planets.inner.earth.__.sources);
+                  // console.log(tree._vertices.planets.inner.earth.name);
+                } catch (e) {
+                  tree._stop();
+                  return done(e);
+                }
+                tree._stop();
+                done();
+              });
+
+              fs.writeFileSync(changesource, content);
+            }).catch(done);
+        });
+
+        it('removes keys (updates vtree) and emits patch (root)',
+          function(done, config, expect, ntree, SolarSystem, fxt, fs, path) {
+            config.patch.previous = true;
+            var _this = this;
+            ntree.create(config).then(function(tree) {
+              _this.tree = tree;
+
+              var changesource = path.normalize(MOUNT + '/planets.js');
+              var content = fxt(function() {/*
+                module.exports = {
+                  //inner: {
+                    // venus: {
+                    //   name: 'Venus',
+                    //   radius: 6052000
+                    // },
+                    // earth: {
+                    //   name: 'Earth'
+                    // },
+                    // mars: {
+                    //   name: 'Mars',
+                    //   radius: 3390000
+                    // }
+                  //},
+                  outer: {
+                    saturn: {
+                      name: 'Saturn'
+                    },
+                    uranus: {
+                      name: 'Uranus',
+                      radius: 25362000
+                    },
+                    neptune: {
+                      name: 'Neptune',
+                      radius: 24622000
+                    }
+                  }
+                }
+              */});
+
+              delete SolarSystem.planets.inner.venus;
+              delete SolarSystem.planets.inner.earth.name;
+              delete SolarSystem.planets.inner.mars;
+
+              tree.on('$patch', function(patch) {
+                try {
+                  expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
+                  expect(patch).to.eql({
+                    doc: {
+                      path: '/planets'
+                    },
+                    patch: [{
+                      op: 'remove',
+                      path: '/inner/mars',
+                      previous: {
+                        name: 'Mars',
+                        radius: 3390000
+                      },
+                    }, {
+                      op: 'remove',
+                      path: '/inner/earth/name',
+                      previous: 'Earth'
+                    }, {
+                      op: 'remove',
+                      path: '/inner/venus',
+                      previous: {
+                        name: 'Venus',
+                        radius: 6052000
+                      }
+                    }]
+                  });
+
+                  expect(tree._vertices.planets.inner.venus).to.not.exist;
+                  expect(tree._vertices.planets.inner.mars).to.not.exist;
+                  expect(tree._vertices.planets.inner.earth.name).to.not.exist;
+
+                  console.log('sources?');
+
+                  // console.log(tree._vertices.planets.__.sources);
+                  // console.log(tree._vertices.planets.inner.__.sources);
+                  // console.log(tree._vertices.planets.inner.earth.__.sources);
+                  // console.log(tree._vertices.planets.inner.earth.name);
                 } catch (e) {
                   tree._stop();
                   return done(e);
@@ -732,19 +836,9 @@ objective('SolarSystem', function(path) {
             }).catch(done);
         });
 
-        it('add new keys (updates vtree) and emits patch (onMultiple last)');
-
-        it('add new keys (updates vtree) and emits patch (onMultiple first)');
-
-        it('add new keys (updates vtree) and emits patch (onMultiple fn)');
+        it('adds keys on overlap');
 
         it('errors on added key already defined from another source');
-
-        it('removes keys (updates vtree) and emits patch (onMultiple last');
-
-        it('removes keys (updates vtree) and emits patch (onMultiple first');
-
-        it('removes keys (updates vtree) and emits patch (onMultiple fn');
 
       });
 
@@ -1562,6 +1656,19 @@ objective('SolarSystem', function(path) {
 
     });
 
+
+  });
+
+  context('syncOut', function() {
+
+    it('writes to all sources when overlapped is removed');
+    it('can modify object to value');
+    it('add new keys (updates vtree) and emits patch (correct source, onMultiple last)');
+    it('add new keys (updates vtree) and emits patch (correct source, onMultiple first)');
+    it('removes keys (updates vtree) and emits patch (correct source, onMultiple last');
+    it('removes keys (updates vtree) and emits patch (correct source, onMultiple first');
+    it('removes keys (updates vtree) and emits patch (correct source, onMultiple fn');
+    it('add new keys (updates vtree) and emits patch (correct source, onMultiple fn)');
 
   });
 
