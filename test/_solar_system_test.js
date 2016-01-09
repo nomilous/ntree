@@ -367,7 +367,128 @@ objective('SolarSystem', function(path) {
             }).catch(done);
         });
 
-        it('removes keys (updates vtree) and emits patch');
+        it('removes keys (updates vtree) and emits patch (root)',
+          function(done, config, expect, ntree, SolarSystem, fxt, fs, path) {
+            config.patch.previous = true;
+            var _this = this;
+            ntree.create(config).then(function(tree) {
+              _this.tree = tree;
+
+              var changesource = path.normalize(MOUNT + '/planets/inner/mercury.js');
+              var content = fxt(function() {/*
+                module.exports = {
+                  radius: 2440000
+                }
+              */});
+
+              delete SolarSystem.planets.inner.mercury.name;
+
+              tree.on('$patch', function(patch) {
+                try {
+                  expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
+                  expect(patch).to.eql({
+                    doc: {
+                      path: '/planets/inner/mercury'
+                    },
+                    patch: [{
+                      op: 'remove',
+                      path: '/name',
+                      previous: 'Mercury'
+                    }]
+                  })
+                } catch (e) {
+                  tree._stop();
+                  return done(e);
+                }
+                tree._stop();
+                done();
+              });
+
+              fs.writeFileSync(changesource, content);
+            }).catch(done);
+        });
+
+        it('removes keys (updates vtree) and emits patch (nested)',
+          function(done, config, expect, ntree, SolarSystem, fxt, fs, path) {
+            config.patch.previous = true;
+            var _this = this;
+            ntree.create(config).then(function(tree) {
+              _this.tree = tree;
+
+              var changesource = path.normalize(MOUNT + '/planets.js');
+              var content = fxt(function() {/*
+                module.exports = {
+                  inner: {
+                    // venus: {
+                    //   name: 'Venus',
+                    //   radius: 6052000
+                    // },
+                    // earth: {
+                    //   name: 'Earth'
+                    // },
+                    // mars: {
+                    //   name: 'Mars',
+                    //   radius: 3390000
+                    // }
+                  },
+                  outer: {
+                    saturn: {
+                      name: 'Saturn'
+                    },
+                    uranus: {
+                      name: 'Uranus',
+                      radius: 25362000
+                    },
+                    neptune: {
+                      name: 'Neptune',
+                      radius: 24622000
+                    }
+                  }
+                }
+              */});
+
+              delete SolarSystem.planets.inner.venus;
+              delete SolarSystem.planets.inner.earth.name;
+              delete SolarSystem.planets.inner.mars;
+
+              tree.on('$patch', function(patch) {
+                try {
+                  expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
+                  expect(patch).to.eql({
+                    doc: {
+                      path: '/planets'
+                    },
+                    patch: [{
+                      op: 'remove',
+                      path: '/inner/venus',
+                      previous: {
+                        name: 'Venus',
+                        radius: 6052000
+                      }
+                    }, {
+                      op: 'remove',
+                      path: '/inner/mars',
+                      previous: {
+                        name: 'Mars',
+                        radius: 3390000
+                      },
+                    }, {
+                      op: 'remove',
+                      path: '/inner/earth/name',
+                      previous: 'Earth'
+                    }]
+                  })
+                } catch (e) {
+                  tree._stop();
+                  return done(e);
+                }
+                tree._stop();
+                done();
+              });
+
+              fs.writeFileSync(changesource, content);
+            }).catch(done);
+        });
 
       });
 
@@ -916,11 +1037,7 @@ objective('SolarSystem', function(path) {
                   },
                   patch: [{
                     op: 'remove',
-                    path: '',
-                    value: {
-                      name: 'Pluto',
-                      radius: 1186000
-                    }
+                    path: ''
                   }]
                 });
 
@@ -980,8 +1097,7 @@ objective('SolarSystem', function(path) {
                   },
                   patch: [{
                     op: 'remove',
-                    path: '/earth/radius',
-                    value: 6371000
+                    path: '/earth/radius'
                   }]
                 });
 
@@ -1013,6 +1129,7 @@ objective('SolarSystem', function(path) {
         // deletes planets.js which overlaps extensively and is a key on the root
         function(done, config, expect, ntree, SolarSystem, fs, path) {
           var _this = this;
+          config.patch.previous = true;
           ntree.create(config).then(function(tree) {
             _this.tree = tree;
 
@@ -1051,7 +1168,7 @@ objective('SolarSystem', function(path) {
                     {
                       op: 'remove',
                       path: '/inner/venus',
-                      value: {
+                      previous: {
                         name: 'Venus',
                         radius: 6052000
                       }
@@ -1059,12 +1176,12 @@ objective('SolarSystem', function(path) {
                     {
                       op: 'remove',
                       path: '/inner/earth/name',
-                      value: 'Earth'
+                      previous: 'Earth'
                     },
                     {
                       op: 'remove',
                       path: '/inner/mars',
-                      value: {
+                      previous: {
                         name: 'Mars',
                         radius: 3390000
                       }
@@ -1072,12 +1189,12 @@ objective('SolarSystem', function(path) {
                     {
                       op: 'remove',
                       path: '/outer/saturn/name',
-                      value: 'Saturn'
+                      previous: 'Saturn'
                     },
                     {
                       op: 'remove',
                       path: '/outer/uranus',
-                      value: {
+                      previous: {
                         name: 'Uranus',
                         radius: 25362000
                       }
@@ -1085,12 +1202,12 @@ objective('SolarSystem', function(path) {
                     {
                       op: 'remove',
                       path: '/outer/neptune/name',
-                      value: 'Neptune'
+                      previous: 'Neptune'
                     },
                     {
                       op: 'remove',
                       path: '/outer/neptune/radius',
-                      value: 24622000
+                      previous: 24622000
                     }
                   ]
                 });
@@ -1157,7 +1274,7 @@ objective('SolarSystem', function(path) {
                     patch: [{
                       op: 'remove',
                       path: '',
-                      value: 'Makemake'
+                      // value: 'Makemake'
                     }]
                   },
                   {
@@ -1167,7 +1284,7 @@ objective('SolarSystem', function(path) {
                     patch: [{
                       op: 'remove',
                       path: '',
-                      value: 739000
+                      // value: 739000
                     }]
                   },
                   {
@@ -1177,7 +1294,7 @@ objective('SolarSystem', function(path) {
                     patch: [{
                       op: 'remove',
                       path: '',
-                      value: {}
+                      // value: {}
                     }]
                   }
                 ])
@@ -1200,6 +1317,7 @@ objective('SolarSystem', function(path) {
         // deletes dwarf_planets which has no overlaps defined in ancestor and is a key on root
         function(done, config, expect, ntree, SolarSystem, rimraf, path) {
           var _this = this;
+          config.patch.previous = true;
           ntree.create(config).then(function(tree) {
             _this.tree = tree;
 
@@ -1231,7 +1349,7 @@ objective('SolarSystem', function(path) {
                       {
                         op: "remove",
                         path: "",
-                        value: {
+                        previous: {
                           name: "Eris",
                           radius: 1163000
                         }
@@ -1246,7 +1364,7 @@ objective('SolarSystem', function(path) {
                       {
                         op: "remove",
                         path: "",
-                        value: {
+                        previous: {
                           name: "Pluto",
                           radius: 1186000
                         }
@@ -1261,7 +1379,7 @@ objective('SolarSystem', function(path) {
                       {
                         op: "remove",
                         path: "",
-                        value: "Makemake"
+                        previous: "Makemake"
                       }
                     ]
                   },
@@ -1273,7 +1391,7 @@ objective('SolarSystem', function(path) {
                       {
                         op: "remove",
                         path: "",
-                        value: 739000
+                        previous: 739000
                       }
                     ]
                   },
@@ -1285,7 +1403,7 @@ objective('SolarSystem', function(path) {
                       {
                         op: "remove",
                         path: "",
-                        value: {}
+                        previous: {}
                       }
                     ]
                   },
@@ -1297,7 +1415,7 @@ objective('SolarSystem', function(path) {
                       {
                         op: "remove",
                         path: "",
-                        value: {}
+                        previous: {}
                       }
                     ]
                   }
@@ -1321,6 +1439,7 @@ objective('SolarSystem', function(path) {
         // deletes planets/inner which has much overlap defined in ancestor
         function(done, config, expect, ntree, SolarSystem, rimraf, path) {
           var _this = this;
+          config.patch.previous = true;
           ntree.create(config).then(function(tree) {
             _this.tree = tree;
 
@@ -1352,7 +1471,7 @@ objective('SolarSystem', function(path) {
                       {
                         op: 'remove',
                         path: '',
-                        value: {
+                        previous: {
                           name: 'Mercury',
                           radius: 2440000
                         }
@@ -1391,6 +1510,7 @@ objective('SolarSystem', function(path) {
         // deletes sun which has overlaps defined in ancestor and is a key on root
         function(done, config, expect, ntree, SolarSystem, rimraf, path) {
           var _this = this;
+          config.patch.previous = true;
           ntree.create(config).then(function(tree) {
             _this.tree = tree;
 
@@ -1417,7 +1537,7 @@ objective('SolarSystem', function(path) {
                     patch: [{
                       op: 'remove',
                       path: '',
-                      value: 696000000
+                      previous: 696000000
                     }]
                   }
                 ]);
