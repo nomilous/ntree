@@ -821,13 +821,9 @@ objective('SolarSystem', function(path) {
 
                 setTimeout(function() {
                   tree._stop();
-                  expect(error.toString()).to.equal('MultipleSourceError: planets');
-                  expect(error.info.sources.map(function(s) {
-                    return s.filePath;
-                  })).to.eql([
-                    'planets.js',
-                    'planets/outer/jupiter/name.js'
-                  ]);
+                  expect(error.toString()).to.equal('MultipleSourceError: planets/outer/jupiter/name');
+                  expect(error.info.original.filePath).to.equal('planets/outer/jupiter/name.js');
+                  expect(error.info.duplicate.filePath).to.equal('planets.js');
                   done();
                 }, 50);
               });
@@ -836,9 +832,211 @@ objective('SolarSystem', function(path) {
             }).catch(done);
         });
 
-        it('adds keys on overlap');
+        it('adds keys on overlap (nested)',
+          function(done, config, expect, ntree, SolarSystem, fxt, fs, path) {
+            var _this = this;
+            ntree.create(config).then(function(tree) {
+              _this.tree = tree;
 
-        it('errors on added key already defined from another source');
+              var changesource = path.normalize(MOUNT + '/planets.js');
+              var content = fxt(function() {/*
+                module.exports = {
+                  inner: {
+                    venus: {
+                      name: 'Venus',
+                      radius: 6052000
+                    },
+                    earth: {
+                      name: 'Earth'
+                    },
+                    mars: {
+                      name: 'Mars',
+                      radius: 3390000
+                    }
+                  },
+                  outer: {
+                    saturn: {
+                      name: 'Saturn'
+                    },
+                    uranus: {
+                      name: 'Uranus',
+                      radius: 25362000
+                    },
+                    neptune: {
+                      name: 'Neptune',
+                      radius: 24622000
+                    },
+                    pluto: {
+                      name: 'Pluto',
+                      radius: 1186000
+                    }
+                  }
+                }
+              */});
+
+              SolarSystem.planets.outer.pluto = {
+                name: 'Pluto',
+                radius: 1186000
+              }
+
+              tree.on('$patch', function(patch) {
+                try {
+                  expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
+                  expect(patch).to.eql({
+                    doc: {
+                      path: '/planets'
+                    },
+                    patch: [{
+                      op: 'add',
+                      path: '/outer/pluto',
+                      value: {
+                        name: 'Pluto',
+                        radius: 1186000
+                      }
+                    }]
+                  });
+                } catch (e) {
+                  tree._stop();
+                  return done(e);
+                }
+
+                tree._stop();
+                done();
+              });
+
+              fs.writeFileSync(changesource, content);
+            }).catch(done);
+        });
+
+
+        it('adds keys on overlap (nested)',
+          function(done, config, expect, ntree, SolarSystem, fxt, fs, path) {
+            var _this = this;
+            ntree.create(config).then(function(tree) {
+              _this.tree = tree;
+
+              var changesource = path.normalize(MOUNT + '/planets.js');
+              var content = fxt(function() {/*
+                module.exports = {
+                  inner: {
+                    venus: {
+                      name: 'Venus',
+                      radius: 6052000
+                    },
+                    earth: {
+                      name: 'Earth'
+                    },
+                    mars: {
+                      name: 'Mars',
+                      radius: 3390000
+                    }
+                  },
+                  trojan: {
+                    untitled: {
+                      name: 'Untitled',
+                      radius: 1 / Infinity
+                    }
+                  },
+                  outer: {
+                    saturn: {
+                      name: 'Saturn'
+                    },
+                    uranus: {
+                      name: 'Uranus',
+                      radius: 25362000
+                    },
+                    neptune: {
+                      name: 'Neptune',
+                      radius: 24622000
+                    }
+                  }
+                }
+              */});
+
+              SolarSystem.planets.trojan = {
+                untitled: {
+                  name: 'Untitled',
+                  radius: 1 / Infinity
+                }
+              };
+
+              tree.on('$patch', function(patch) {
+                try {
+                  expect(JSON.parse(JSON.stringify(tree))).to.eql(SolarSystem);
+                  expect(patch).to.eql({
+                    doc: {
+                      path: '/planets'
+                    },
+                    patch: [{
+                      op: 'add',
+                      path: '/trojan',
+                      value: {
+                        untitled: {
+                          name: 'Untitled',
+                          radius: 1 / Infinity
+                        }
+                      }
+                    }]
+                  });
+
+                  expect(tree._vertices.planets.trojan.untitled.__.sources.length).to.equal(1);
+                  expect(tree._vertices.planets.trojan.untitled.__.sources[0].filePath).to.equal('planets.js');
+                } catch (e) {
+                  tree._stop();
+                  return done(e);
+                }
+
+                tree._stop();
+                done();
+              });
+
+              fs.writeFileSync(changesource, content);
+            }).catch(done);
+        });
+
+        it('errors on added key already defined from another source',
+          function(done, config, expect, ntree, SolarSystem, fxt, fs, path, MultipleSourceError) {
+            var _this = this;
+            ntree.create(config).then(function(tree) {
+              _this.tree = tree;
+
+              var changesource = path.normalize(MOUNT + '/planets/inner.js');
+              var content = fxt(function() {/*
+                module.exports = {
+                  earth: {
+                    radius: 6371000,
+                    name: 'Earth' // cause MultipleSourceError, already defined in planets.js
+                  }
+                }
+              */});
+
+              var patched;
+              tree.on('$patch', function(patch) {
+                // TODO: error into patch
+                patched = patch;
+              });
+
+              tree.on('$error', function(e) {
+                expect(e).to.be.an.instanceof(MultipleSourceError);
+                expect(e.info.original.filePath).to.equal('planets.js');
+                expect(e.info.duplicate.filePath).to.equal('planets/inner.js');
+                expect(e.info.route).to.eql(['planets', 'inner', 'earth', 'name']);
+
+                setTimeout(function() {
+                  tree._stop();
+                  expect(patched).to.eql({
+                    doc: {
+                      path: '/planets/inner'
+                    },
+                    patch: []
+                  });
+                  done();
+                }, 50);
+              });
+
+              fs.writeFileSync(changesource, content);
+            }).catch(done);
+        });
 
       });
 

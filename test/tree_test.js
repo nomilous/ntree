@@ -118,15 +118,15 @@ objective('Tree', function() {
   });
 
   context('_start()', function() {
-    xit('loads the tree by passing the emitter into the recursor', function(done, Tree, expect) {
-      var opts = {mount: __dirname};
-      var tree = new Tree(opts);
-      mock(tree._tools).spy(function readdirRecurseAsync(emitter, filename) {
-        expect(emitter).to.equal(tree._emitter);
-        expect(filename).to.equal(__dirname);
-      })
-      tree._start().then(done).catch(done);
-    });
+    // xit('loads the tree by passing the emitter into the recursor', function(done, Tree, expect) {
+    //   var opts = {mount: __dirname};
+    //   var tree = new Tree(opts);
+    //   mock(tree._tools).spy(function readdirRecurseAsync(emitter, filename) {
+    //     expect(emitter).to.equal(tree._emitter);
+    //     expect(filename).to.equal(__dirname);
+    //   })
+    //   tree._start().then(done).catch(done);
+    // });
   });
 
   context('_attachSource()', function() {
@@ -375,30 +375,30 @@ objective('Tree', function() {
         done();
       });
 
-      xit('ammends when existing Vertex at same location', function(done, tree, sourceFile, expect) {
-        mock(sourceFile.serializer = {}).does(
-          function readSync(vertex) {
-            return {
-              key1: 1
-            }
-          },
-          function readSync(vertex) {
-            return {
-              key1: 1
-            }
-          }
-        );
+      // xit('ammends when existing Vertex at same location', function(done, tree, sourceFile, expect) {
+      //   mock(sourceFile.serializer = {}).does(
+      //     function readSync(vertex) {
+      //       return {
+      //         key1: 1
+      //       }
+      //     },
+      //     function readSync(vertex) {
+      //       return {
+      //         key1: 1
+      //       }
+      //     }
+      //   );
 
-        sourceFile.filePath = 'branch';
-        sourceFile.treePath = 'branch';
+      //   sourceFile.filePath = 'branch';
+      //   sourceFile.treePath = 'branch';
 
-        tree._attachFile(sourceFile);
-        expect(tree._vertices.branch.key1.__.sources.length).to.equal(1);
+      //   tree._attachFile(sourceFile);
+      //   expect(tree._vertices.branch.key1.__.sources.length).to.equal(1);
 
-        tree._attachFile(sourceFile);
-        expect(tree._vertices.branch.key1.__.sources.length).to.equal(2);
-        done();
-      });
+      //   tree._attachFile(sourceFile);
+      //   expect(tree._vertices.branch.key1.__.sources.length).to.equal(2);
+      //   done();
+      // });
 
     });
 
@@ -466,11 +466,11 @@ objective('Tree', function() {
   });
 
   context('_detachDirectory()', function() {
-    xit('')
+    // xit('');
   });
 
   context('_detachFile()', function() {
-    xit('')
+    // xit('');
   });
 
   context('_activate()', function() {
@@ -520,7 +520,5 @@ objective('Tree', function() {
   xit('can be stopped cleanly', function() {
     // syncIn, syncOut false, delete
   });
-
-  xit('collides on neptune?')
 
 });
