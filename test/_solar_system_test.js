@@ -419,14 +419,21 @@ objective('SolarSystem', function(path) {
               var content = fxt(function() {/*
                 module.exports = {
                   inner: {
-                    // venus: {
+                    // // a quite complicated update!!
+                    // // especially because planets.js:/inner overlaps with
+                    // //              file: planets/inner.js
+                    // //           and dir: planets/inner/
+                    // //
+                    // // runs the delete in vertex.updateKey()
+                    // //
+                    // venus: { // getKeysWithOnlyThisSource()
                     //   name: 'Venus',
                     //   radius: 6052000
                     // },
-                    // earth: {
-                    //   name: 'Earth'
+                    // earth: {  // getKeysWithThisAndOtherSources()
+                    //   name: 'Earth' // getNestedVerticesWithOnlyThisSource()
                     // },
-                    // mars: {
+                    // mars: { // getKeysWithOnlyThisSource
                     //   name: 'Mars',
                     //   radius: 3390000
                     // }
@@ -483,12 +490,20 @@ objective('SolarSystem', function(path) {
                   expect(tree._vertices.planets.inner.mars).to.not.exist;
                   expect(tree._vertices.planets.inner.earth.name).to.not.exist;
 
-                  console.log('sources?');
+                  expect(tree._vertices.planets.__.sources.map(function(s) {
+                    return s.filePath;
+                  })).to.eql(['planets', 'planets.js']);
 
-                  // console.log(tree._vertices.planets.__.sources);
-                  // console.log(tree._vertices.planets.inner.__.sources);
-                  // console.log(tree._vertices.planets.inner.earth.__.sources);
-                  // console.log(tree._vertices.planets.inner.earth.name);
+                  expect(tree._vertices.planets.inner.__.sources.map(function(s) {
+                    return s.filePath;
+                  })).to.eql(['planets.js', 'planets/inner', 'planets/inner.js']);
+
+                  expect(tree._vertices.planets.inner.earth.__.sources.map(function(s) {
+                    return s.filePath;
+                  })).to.eql(['planets/inner.js']);
+
+                  expect(tree._vertices.planets.inner.earth.name).to.not.exist;
+                  
                 } catch (e) {
                   tree._stop();
                   return done(e);
@@ -511,6 +526,10 @@ objective('SolarSystem', function(path) {
               var changesource = path.normalize(MOUNT + '/planets.js');
               var content = fxt(function() {/*
                 module.exports = {
+                  //
+                  // same as previous test but removes entire inner branch
+                  // runs delete in vertex.updateSource()
+                  //
                   //inner: {
                     // venus: {
                     //   name: 'Venus',
@@ -576,12 +595,20 @@ objective('SolarSystem', function(path) {
                   expect(tree._vertices.planets.inner.mars).to.not.exist;
                   expect(tree._vertices.planets.inner.earth.name).to.not.exist;
 
-                  console.log('sources?');
+                  expect(tree._vertices.planets.__.sources.map(function(s) {
+                    return s.filePath;
+                  })).to.eql(['planets', 'planets.js']);
 
-                  // console.log(tree._vertices.planets.__.sources);
-                  // console.log(tree._vertices.planets.inner.__.sources);
-                  // console.log(tree._vertices.planets.inner.earth.__.sources);
-                  // console.log(tree._vertices.planets.inner.earth.name);
+                  expect(tree._vertices.planets.inner.__.sources.map(function(s) {
+                    return s.filePath;
+                  })).to.eql(['planets/inner', 'planets/inner.js']);
+
+                  expect(tree._vertices.planets.inner.earth.__.sources.map(function(s) {
+                    return s.filePath;
+                  })).to.eql(['planets/inner.js']);
+
+                  expect(tree._vertices.planets.inner.earth.name).to.not.exist;
+
                 } catch (e) {
                   tree._stop();
                   return done(e);
