@@ -10,14 +10,14 @@ A file system based "living tree" of functional data.
 
 It assembles a `tree` of data from file sources recursed out of the `config.mount` directory. Each source is a node/javascript file with data per whatever it `module.exports`.
 
-### Play with cli and sample data
+### try cli with sample data
 
 **first console:** start cli (repl) with data directory to mount
 
 ```javascript
 bin/ntree sample/solar_system
 >
-> // view tree
+> // view the tree
 > $tree  
 Tree {
   dwarf_planets: [Getter/Setter],
@@ -52,7 +52,34 @@ mkdir sample/solar_system/planets/outer/jupiter/moons
     }
   ]
 }
+>
+>
+> // create new key
+> $tree.planets.inner.earth.population = 7300000000;
+7300000000
+>
+>
 ```
+
+**back in first console** see `$patch` event from new key
+
+```javascript
+>
+> {
+  "doc": {
+    "path": "/planets/inner"
+  },
+  "patch": [
+    {
+      "op": "add",
+      "path": "/earth/population",
+      "value": 7300000000
+    }
+  ]
+}
+```
+Note: `earth.population` was written into `planets/inner.js` because that is where `earth` was last defined. (earth is also defined in `planets.js`, see `opts.source.select` to control where new keys on nodes with multiple sources are synced to)
+
 ***
 
 TODO: add .json
@@ -84,6 +111,8 @@ TODO: array support
 TODO: lazy loading
 
 TODO: should all directory event emit noop patch operation
+
+TODO: opts.source.select = function(vertex) {}
 
 ## eg.
 

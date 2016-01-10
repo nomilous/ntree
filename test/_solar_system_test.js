@@ -1916,6 +1916,7 @@ objective('SolarSystem', function(path) {
                   expect(tree._vertices.dwarf_planets.eris.year.__).to.exist;
                   expect(tree._vertices.dwarf_planets.eris.year.__.sources.length).to.equal(1);
                   expect(tree._vertices.dwarf_planets.eris.year.__.sources[0].filePath).to.equal('dwarf_planets/eris.js');
+                  
                   expect(tree.dwarf_planets.eris.year).to.equal('560.9 Earth Years');
 
                   delete require.cache[sourceFile];
@@ -1946,7 +1947,58 @@ objective('SolarSystem', function(path) {
 
         context('onMultiple last', function() {
 
-          xit('assigns correct source, writes file and emits patch 2');
+          it('assigns correct source, writes file and emits patch 2',
+            function(done, config, ntree, expect, fs, path) {
+              var _this = this;
+              // config...
+              ntree.create(config).then(function(tree) {
+                _this.tree = tree;
+
+                var sourceFile = path.normalize(MOUNT + '/planets/inner.js');
+
+                tree.on('$patch', function(patch) {
+                  try {
+                    expect(patch).to.eql({
+                      doc: {
+                        path: '/planets/inner'
+                      },
+                      patch: [{
+                        op: 'add',
+                        path: '/earth/population',
+                        value: 7300000000
+                      }]
+                    });
+
+                    expect(tree._vertices.planets.inner.earth.population).to.exist;
+                    expect(tree._vertices.planets.inner.earth.population.__).to.exist;
+                    expect(tree._vertices.planets.inner.earth.population.__.sources.length).to.equal(1);
+                    expect(tree._vertices.planets.inner.earth.population.__.sources[0].filePath).to.equal('planets/inner.js');
+                    
+                    expect(tree.planets.inner.earth.population).to.equal(7300000000);
+
+                    delete require.cache[sourceFile];
+                    var source = require(sourceFile);
+
+                    expect(source).to.eql({
+
+                    });
+
+                  } catch (e) {
+                    tree._stop();
+                    return done(e);
+                  }
+                  tree._stop();
+                  done();
+                });
+
+                // write new key on vertex with more than one file source
+                // planets.js and planets/inner.js
+                // mode: onMultiple: 'last' (choose the deepest source)
+
+                tree.planets.inner.earth.population = 7300000000;
+
+              }).catch(done);
+          });
 
         });
 
