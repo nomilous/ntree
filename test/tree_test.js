@@ -204,6 +204,7 @@ objective('Tree', function() {
     it('attaches tree reference to source and creates type and route',
       function(done, tree, sourceDir, expect, Tools, SourceType) {
         mock(Tools.prototype).stub(function getNested(){
+          this.parent = {};
           return {
             __: {
               sources: []
@@ -474,7 +475,7 @@ objective('Tree', function() {
   });
 
   context('_activate()', function() {
-    it('is called on ready watcher', function(done, Tree, chokidar) {
+    it('is called on ready watcher', function(done, Tree, chokidar, bluebird) {
       chokidar.does(function watch() {
         return {
           on: function(event, handler) {
@@ -485,14 +486,16 @@ objective('Tree', function() {
           }
         }
       });
-      mock(Tree.prototype).does(function _activate() {});
+      mock(Tree.prototype).does(function _activate() {
+        return bluebird.resolve();
+      });
       var tree = new Tree({
         mount: 'dir'
       });
       tree._start();
       done();
     });
-    it('starts the scanner interval calling into agents', function(done, Tree, bluebird, expect) {
+    xit('starts the scanner interval calling into agents', function(done, Tree, bluebird, expect) {
       var tree = {
         mount: 'dir',
         _opts: {
@@ -517,7 +520,7 @@ objective('Tree', function() {
     });
   })
 
-  xit('can be stopped cleanly', function() {
+  it('can be stopped cleanly', function() {
     // syncIn, syncOut false, delete
   });
 

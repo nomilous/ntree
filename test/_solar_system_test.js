@@ -101,6 +101,16 @@ objective('SolarSystem', function(path) {
     });
   });
 
+  afterEach(function() {
+    // when some of the tests fail thay can leave the tree active
+    // and then events are fired on the cleanup deletions from _temp 
+    if (this.tree) this.tree._stop();
+
+
+    // this.timeout(4000);
+    // setTimeout(done, 3000);
+  });
+
 
   it('loads the solar system ok',
     function(done, config, expect, ntree, SolarSystem) {
@@ -112,17 +122,7 @@ objective('SolarSystem', function(path) {
   });
 
 
-  context('syncIn', function() {
-
-    afterEach(function() {
-      // when some of the tests fail thay can leave the tree active
-      // and then events are fired on the cleanup deletions from _temp 
-      if (this.tree) this.tree._stop();
-
-
-      // this.timeout(4000);
-      // setTimeout(done, 3000);
-    });
+  context('syncIn (changes originating on disk)', function() {
 
     context('changed source files', function() {
       
@@ -1884,16 +1884,234 @@ objective('SolarSystem', function(path) {
 
   });
 
-  context('syncOut', function() {
+  context.only('syncOut (changes originating in tree)', function() {
 
-    it('writes to all sources when overlapped is removed');
-    it('can modify object to value');
-    it('add new keys (updates vtree) and emits patch (correct source, onMultiple last)');
-    it('add new keys (updates vtree) and emits patch (correct source, onMultiple first)');
-    it('removes keys (updates vtree) and emits patch (correct source, onMultiple last');
-    it('removes keys (updates vtree) and emits patch (correct source, onMultiple first');
-    it('removes keys (updates vtree) and emits patch (correct source, onMultiple fn');
-    it('add new keys (updates vtree) and emits patch (correct source, onMultiple fn)');
+    context('adding keys (detected by scan)', function() {
+
+      context('no overlap', function() {
+
+        it('assigns correct source, writes file and emits patch 1',
+          function(done, config, ntree, expect, fs, path) {
+            var _this = this;
+            // config...
+            ntree.create(config).then(function(tree) {
+              _this.tree = tree;
+
+              var sourceFile = path.normalize(MOUNT + '/dwarf_planets/eris.js');
+
+              tree.on('$patch', function(patch) {
+                try {
+                  expect(patch).to.eql({
+                    doc: {
+                      path: '/dwarf_planets/eris'
+                    },
+                    patch: [{
+                      op: 'add',
+                      path: '/year',
+                      value: '560.9 Earth Years'
+                    }]
+                  });
+
+                  expect(tree._vertices.dwarf_planets.eris.year).to.exist;
+                  expect(tree._vertices.dwarf_planets.eris.year.__).to.exist;
+                  expect(tree._vertices.dwarf_planets.eris.year.__.sources.length).to.equal(1);
+                  expect(tree._vertices.dwarf_planets.eris.year.__.sources[0].filePath).to.equal('dwarf_planets/eris.js');
+                  expect(tree.dwarf_planets.eris.year).to.equal('560.9 Earth Years');
+
+                  delete require.cache[sourceFile];
+                  var source = require(sourceFile);
+
+                  expect(source).to.eql({
+                    name: 'Eris',
+                    radius: 1163000,
+                    year: '560.9 Earth Years'
+                  });
+
+                } catch (e) {
+                  tree._stop();
+                  return done(e);
+                }
+                tree._stop();
+                done();
+              });
+
+              tree.dwarf_planets.eris.year = '560.9 Earth Years';
+
+            }).catch(done);
+        });
+
+      });
+
+      context('with overlap', function() {
+
+        context('onMultiple last', function() {
+
+          xit('assigns correct source, writes file and emits patch 2');
+
+        });
+
+        context('onMultiple first', function() {
+
+          xit('assigns correct source, writes file and emits patch 3');
+
+        });
+
+      });
+
+    });
+
+    context('deleting keys (detected by scan)', function() {
+
+      context('no overlap', function() {
+
+        context('value', function() {
+
+          xit('emits patch, removes vertex and updates file 1', function() {
+
+          });
+
+          xit('ignores file change (no inbound "sync echo") 1', function() {
+
+          });
+
+        });
+
+        context('branch', function() {
+
+          xit('emits patch, removes vertex branch and updates file 2', function() {
+
+          });
+
+          xit('ignores file change (no inbound "sync echo") 2', function() {
+
+          });
+
+        });
+
+      });
+
+      context('with overlap', function() {
+
+        context('value', function() {
+
+          xit('emits patch and updates file 3', function() {
+
+          });
+
+          xit('ignores file change (no inbound "sync echo") 3', function() {
+
+          });
+
+        });
+
+        context('branch', function() {
+
+          xit('emits patch and updates multiple files 4', function() {
+
+          });
+
+          xit('ignores file change (no inbound "sync echo") 4', function() {
+
+          });
+
+        });
+
+      });
+
+    });
+
+    context('changing keys (detected by setter)', function() {
+
+      context('no overlap', function() {
+
+        context('value to branch', function() {
+
+          xit('emits patch and updates file 5', function() {
+
+          });
+
+          xit('ignores file change (no inbound "sync echo") 5', function() {
+
+          });
+
+        });
+
+        context('branch', function() {
+
+          xit('emits patch and updates file 6', function() {
+
+          });
+
+          xit('ignores file change (no inbound "sync echo") 6', function() {
+
+          });
+
+        });
+
+        context('branch to value', function() {
+
+          xit('emits patch and updates file 7', function() {
+
+          });
+
+          xit('ignores file change (no inbound "sync echo") 7', function() {
+
+          });
+
+        });
+
+      });
+
+      context('with overlap', function() {
+
+        context('value to branch', function() {
+
+          xit('emits patch and updates file 8', function() {
+
+          });
+
+          xit('ignores file change (no inbound "sync echo") 8', function() {
+
+          });
+
+        });
+
+        context('branch', function() {
+          
+          xit('emits patch and updates file 9', function() {
+
+          });
+
+          xit('ignores file change (no inbound "sync echo") 9', function() {
+
+          });
+
+        });
+
+        context('branch to value', function() {
+          
+          xit('emits patch and updates file 10', function() {
+
+          });
+
+          xit('ignores file change (no inbound "sync echo") 10', function() {
+
+          });
+
+        });
+
+      });
+
+    });
+
+    // it('writes to all sources when overlapped is removed');
+    // it('can modify object to value');
+    // it('add new keys (updates vtree) and emits patch (correct source, onMultiple last)');
+    // it('add new keys (updates vtree) and emits patch (correct source, onMultiple first)');
+    // it('removes keys (updates vtree) and emits patch (correct source, onMultiple last');
+    // it('removes keys (updates vtree) and emits patch (correct source, onMultiple first');
+    // it('removes keys (updates vtree) and emits patch (correct source, onMultiple fn');
+    // it('add new keys (updates vtree) and emits patch (correct source, onMultiple fn)');
 
   });
 
