@@ -1980,7 +1980,10 @@ objective('SolarSystem', function(path) {
                     var source = require(sourceFile);
 
                     expect(source).to.eql({
-
+                      earth: {
+                        radius: 6371000,
+                        population: 7300000000
+                      }
                     });
 
                   } catch (e) {
