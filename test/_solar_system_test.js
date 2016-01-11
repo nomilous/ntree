@@ -1941,6 +1941,36 @@ objective('SolarSystem', function(path) {
             }).catch(done);
         });
 
+        it('ignores file watcher event from write (resulting inbound patch would be duplication)',
+          function(done, config, ntree, expect, fs, path) {
+            var _this = this;
+            // config...
+            ntree.create(config).then(function(tree) {
+              _this.tree = tree;
+
+              var sourceFile = path.normalize(MOUNT + '/dwarf_planets/eris.js');
+              var update = false;
+
+              fs.spy(function writeFileSync(filename) {
+                expect(filename).to.equal(sourceFile);
+                setTimeout(function() {
+                  expect(update).to.be.false;
+                  tree._stop();
+                  done();
+                }, 200);
+              });
+
+              mock(tree._vertices.dwarf_planets.eris.__).spy(
+                function updateSource(source) {
+                  if (source.filename == sourceFile) update = true;
+                }
+              );
+
+              tree.dwarf_planets.eris.year = '560.9 Earth Years';
+
+            }).catch(done);
+        });
+
       });
 
       context('with overlap', function() {
@@ -2007,7 +2037,97 @@ objective('SolarSystem', function(path) {
 
         context('onMultiple first', function() {
 
-          xit('assigns correct source, writes file and emits patch 3');
+          it('assigns correct source, writes file and emits patch 3',
+            function(done, config, ntree, expect, fs, path) {
+              var _this = this;
+              config.source = {
+                select: 'first'
+              };
+              ntree.create(config).then(function(tree) {
+                _this.tree = tree;
+
+                var sourceFile = path.normalize(MOUNT + '/planets.js');
+                var notSourceFile = path.normalize(MOUNT + '/planets/inner.js');
+
+                tree.on('$patch', function(patch) {
+                  try {
+                    expect(patch).to.eql({
+                      doc: {
+                        path: '/planets'
+                      },
+                      patch: [{
+                        op: 'add',
+                        path: '/inner/earth/population',
+                        value: 7300000000
+                      }]
+                    });
+
+                    expect(tree._vertices.planets.inner.earth.population).to.exist;
+                    expect(tree._vertices.planets.inner.earth.population.__).to.exist;
+                    expect(tree._vertices.planets.inner.earth.population.__.sources.length).to.equal(1);
+                    expect(tree._vertices.planets.inner.earth.population.__.sources[0].filePath).to.equal('planets.js');
+                    
+                    expect(tree.planets.inner.earth.population).to.equal(7300000000);
+
+                    delete require.cache[sourceFile];
+                    var source = require(sourceFile);
+
+                    delete require.cache[notSourceFile];
+                    var notSource = require(notSourceFile);
+
+                    expect(source).to.eql({
+                      inner: {
+                        venus: {
+                          name: 'Venus',
+                          radius: 6052000
+                        },
+                        earth: {
+                          name: 'Earth',
+                          population: 7300000000 // <----------
+                        },
+                        mars: {
+                          name: 'Mars',
+                          radius: 3390000
+                        }
+                      },
+                      outer: {
+                        saturn: {
+                          name: 'Saturn'
+                        },
+                        uranus: {
+                          name: 'Uranus',
+                          radius: 25362000
+                        },
+                        neptune: {
+                          name: 'Neptune',
+                          radius: 24622000
+                        }
+                      }
+                    });
+
+                    expect(notSource).to.eql({
+                      earth: {
+                        radius: 6371000,
+                        // population: 7300000000 // <--------- went into first source
+                      }
+                    });
+
+                  } catch (e) {
+                    tree._stop();
+                    return done(e);
+                  }
+                  tree._stop();
+                  done();
+                });
+
+                // write new key on vertex with more than one file source
+                // planets.js and planets/inner.js
+                // mode: onMultiple: 'last' (choose the deepest source)
+
+                tree.planets.inner.earth.population = 7300000000;
+
+              }).catch(done);
+          });
 
         });
 

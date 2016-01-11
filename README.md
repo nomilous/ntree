@@ -84,6 +84,8 @@ Note: `earth.population` was written into `planets/inner.js` because that is whe
 
 TODO: add .json
 
+TODO: prepend control vars on tree $$ instead of _
+
 TODO: It synchronizes changes: file system ---> `tree`
 
 TODO: It synchronizes changes: `tree` ---> file system
