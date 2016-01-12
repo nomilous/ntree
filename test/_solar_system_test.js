@@ -1395,10 +1395,6 @@ objective('SolarSystem', function(path) {
             // console.log(vref);
             // console.log(tref);
 
-            // TODO: new keys added may have been stored in ??? when overlapping paths
-            //       !!complicating which should be deleted when overlapping
-            //       !!use last file source to determine
-
             // create expected (post deletion) solar system
             delete SolarSystem.planets.inner.earth.radius;
 
@@ -1884,13 +1880,13 @@ objective('SolarSystem', function(path) {
 
   });
 
-  context.only('syncOut (changes originating in tree)', function() {
+  context('syncOut (changes originating in tree)', function() {
 
     context('adding keys (detected by scan)', function() {
 
       context('no overlap', function() {
 
-        it('assigns correct source, writes file and emits patch 1',
+        xit('assigns correct source, writes file and emits patch 1',
           function(done, config, ntree, expect, fs, path) {
             var _this = this;
             // config...
@@ -1975,7 +1971,7 @@ objective('SolarSystem', function(path) {
 
       context('with overlap', function() {
 
-        context('onMultiple last', function() {
+        context('source.select deep', function() {
 
           it('assigns correct source, writes file and emits patch 2',
             function(done, config, ntree, expect, fs, path) {
@@ -2026,7 +2022,7 @@ objective('SolarSystem', function(path) {
 
                 // write new key on vertex with more than one file source
                 // planets.js and planets/inner.js
-                // mode: onMultiple: 'last' (choose the deepest source)
+                // mode: source.select: 'deep' (choose the deepest source)
 
                 tree.planets.inner.earth.population = 7300000000;
 
@@ -2035,13 +2031,13 @@ objective('SolarSystem', function(path) {
 
         });
 
-        context('onMultiple first', function() {
+        context('source.select shallow', function() {
 
           it('assigns correct source, writes file and emits patch 3',
             function(done, config, ntree, expect, fs, path) {
               var _this = this;
               config.source = {
-                select: 'first'
+                select: 'shallow'
               };
               ntree.create(config).then(function(tree) {
                 _this.tree = tree;
@@ -2108,7 +2104,7 @@ objective('SolarSystem', function(path) {
                     expect(notSource).to.eql({
                       earth: {
                         radius: 6371000,
-                        // population: 7300000000 // <--------- went into first source
+                        // population: 7300000000 // <--------- went into shallower source
                       }
                     });
 
@@ -2122,7 +2118,7 @@ objective('SolarSystem', function(path) {
 
                 // write new key on vertex with more than one file source
                 // planets.js and planets/inner.js
-                // mode: onMultiple: 'last' (choose the deepest source)
+                // mode: source.select: 'deep' (choose the deepest source)
 
                 tree.planets.inner.earth.population = 7300000000;
 
@@ -2139,19 +2135,187 @@ objective('SolarSystem', function(path) {
 
       context('no overlap', function() {
 
-        context('value', function() {
+        context('delete value', function() {
 
-          xit('emits patch, removes vertex and updates file 1', function() {
+          it('emits patch, removes vertex and updates file 1.1',
+            function(done, config, ntree, expect, fs, path) {
+              var _this = this;
+              config.patch.previous = true;
+              ntree.create(config).then(function(tree) {
+                _this.tree = tree;
 
-          });
+                var source, sourceFile = path.normalize(MOUNT + '/planets/inner.js');
 
-          xit('ignores file change (no inbound "sync echo") 1', function() {
+                tree.on('$patch', function(patch) {
+                  try {
+                    expect(patch).to.eql({
+                      doc: {
+                        path: '/planets/inner',
+                      },
+                      patch: [{
+                        op: 'remove',
+                        path: '/earth/radius',
+                        previous: 6371000
+                      }]
+                    });
 
+                    delete require.cache[sourceFile];
+                    source = require(sourceFile);
+                    expect(source).to.eql({
+                      earth: {}
+                    });
+
+                    expect(tree._vertices.planets.inner.earth.radius).to.not.exist;
+
+                  } catch (e) {
+                    return done(e);
+                  }
+                  done();
+                });
+
+                delete tree.planets.inner.earth.radius;
+
+              }).catch(done);
           });
 
         });
 
-        context('branch', function() {
+        context('delete multiple values on different sources', function() {
+
+          it('emits patch, removes vertex and updates file 1.2',
+            function(done, config, ntree, expect, fs, path) {
+              var _this = this;
+              config.patch.previous = true;
+              ntree.create(config).then(function(tree) {
+                _this.tree = tree;
+
+                var source1, sourceFile1 = path.normalize(MOUNT + '/planets.js');
+                var source2, sourceFile2 = path.normalize(MOUNT + '/planets/inner.js');
+
+                var patches = [];
+
+                tree.on('$patch', function(patch) {
+                  patches.push(patch);
+                  if (patches.length == 1) return;
+                  try {
+                    expect(patches).to.eql([{
+                      doc: {
+                        path: '/planets'
+                      },
+                      patch: [{
+                        op: 'remove',
+                        path: '/inner/earth/name',
+                        previous: 'Earth'
+                      }]
+                    }, {
+                      doc: {
+                        path: '/planets/inner'
+                      },
+                      patch: [{
+                        op: 'remove',
+                        path: '/earth/radius',
+                        previous: 6371000
+                      }]
+                    }]);
+
+                    delete require.cache[sourceFile1];
+                    delete require.cache[sourceFile2];
+                    source1 = require(sourceFile1);
+                    source2 = require(sourceFile2);
+                    
+                    expect(source1.inner.earth).to.eql({});
+                    expect(source2.earth).to.eql({});
+
+                  } catch (e) {
+                    return done(e);
+                  }
+                  done();
+                });
+
+                delete tree.planets.inner.earth.radius;
+                delete tree.planets.inner.earth.name;
+
+              }).catch(done);
+          });
+
+        });
+
+        context('delete multiple values on same source', function() {
+
+          it('emits patch, removes vertex and updates file 1.3',
+            function(done, config, ntree, expect, fs, path) {
+              var _this = this;
+              ntree.create(config).then(function(tree) {
+                _this.tree = tree;
+
+                var source, sourceFile = path.normalize(MOUNT + '/planets.js');
+
+                tree.on('$patch', function(patch) {
+                  try {
+                    expect(patch).to.eql({
+                      doc: {
+                        path: '/planets'
+                      },
+                      patch: [{
+                        op: 'remove',
+                        path: '/outer/neptune/name'
+                      }, {
+                        op: 'remove',
+                        path: '/outer/neptune/radius'
+                      }]
+                    });
+
+                    delete require.cache[sourceFile];
+                    source = require(sourceFile);
+                    expect(source).to.eql({
+                      inner: {
+                        venus: {
+                          name: 'Venus',
+                          radius: 6052000
+                        },
+                        earth: {
+                          name: 'Earth'
+                        },
+                        mars: {
+                          name: 'Mars',
+                          radius: 3390000
+                        }
+                      },
+                      outer: {
+                        saturn: {
+                          name: 'Saturn'
+                        },
+                        uranus: {
+                          name: 'Uranus',
+                          radius: 25362000
+                        },
+                        neptune: {
+                          // name: 'Neptune',
+                          // radius: 24622000
+                        }
+                      }
+                    });
+
+                    expect(tree._vertices.planets.outer.neptune).to.exist;
+                    expect(tree._vertices.planets.outer.neptune.name).to.not.exist;
+                    expect(tree._vertices.planets.outer.neptune.radius).to.not.exist;
+
+                  } catch (e) {
+                    return done(e);
+                  }
+                  done();
+                });
+                
+                // TODO: neptune = {} remains (perhaps option to delete empty objects)
+                delete tree.planets.outer.neptune.name;
+                delete tree.planets.outer.neptune.radius;
+
+              }).catch(done);
+          });
+
+        });
+
+        context('delete branch', function() {
 
           xit('emits patch, removes vertex branch and updates file 2', function() {
 
@@ -2163,11 +2327,19 @@ objective('SolarSystem', function(path) {
 
         });
 
+        context('delete branch that is directory', function() {
+
+          xit('', function() {
+
+          });
+
+        });
+
       });
 
       context('with overlap', function() {
 
-        context('value', function() {
+        context('delete value', function() {
 
           xit('emits patch and updates file 3', function() {
 
@@ -2179,13 +2351,21 @@ objective('SolarSystem', function(path) {
 
         });
 
-        context('branch', function() {
+        context('delete branch', function() {
 
           xit('emits patch and updates multiple files 4', function() {
 
           });
 
           xit('ignores file change (no inbound "sync echo") 4', function() {
+
+          });
+
+        });
+
+        context('delete branch that is directory and file', function() {
+
+          xit('', function() {
 
           });
 
@@ -2278,15 +2458,6 @@ objective('SolarSystem', function(path) {
       });
 
     });
-
-    // it('writes to all sources when overlapped is removed');
-    // it('can modify object to value');
-    // it('add new keys (updates vtree) and emits patch (correct source, onMultiple last)');
-    // it('add new keys (updates vtree) and emits patch (correct source, onMultiple first)');
-    // it('removes keys (updates vtree) and emits patch (correct source, onMultiple last');
-    // it('removes keys (updates vtree) and emits patch (correct source, onMultiple first');
-    // it('removes keys (updates vtree) and emits patch (correct source, onMultiple fn');
-    // it('add new keys (updates vtree) and emits patch (correct source, onMultiple fn)');
 
   });
 

@@ -129,7 +129,9 @@ objective('Vertex', function() {
 
     it('returns vertex.value', function(done, Vertex, expect) {
       var vertex = {
-        value: 1
+        value: 1,
+        tree: {
+        }
       }
       expect(Vertex.prototype.getValue.call(vertex)).to.equal(1);
       done();
